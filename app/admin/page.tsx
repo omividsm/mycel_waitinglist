@@ -5,16 +5,36 @@ import { getWaitingList } from "../actions";
 import { 
   Users, 
   TrendingUp, 
-  Calendar, 
-  ArrowLeft, 
   LogOut, 
   BarChart3,
   Activity,
   Mail,
-  ShieldCheck
+  ShieldCheck,
+  Sun,
+  Moon,
+  LayoutDashboard,
+  Settings,
+  Bell,
+  Search,
+  ChevronRight,
+  MoreHorizontal,
+  ArrowUpRight,
+  ArrowDownRight
 } from "lucide-react";
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  AreaChart,
+  Area
+} from 'recharts';
 
 export default function AdminDashboard() {
+  const [dark, setDark] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,6 +46,13 @@ export default function AdminDashboard() {
   const ADMIN_PASSWORD = "12345";
 
   const orange = "#FF4D00";
+  
+  // Theme derived values
+  const bg      = dark ? "#000000" : "#ffffff";
+  const fg      = dark ? "#ffffff" : "#000000";
+  const surface = dark ? "#09090b" : "#f8f9fa";
+  const border  = dark ? "#1c1c1f" : "#e5e7eb";
+  const muted   = dark ? "#a1a1aa" : "#64748b";
 
   function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -33,7 +60,7 @@ export default function AdminDashboard() {
       setIsLoggedIn(true);
       setError("");
     } else {
-      setError("Access Denied. Invalid credentials.");
+      setError("Unauthorized access attempt.");
     }
   }
 
@@ -46,199 +73,229 @@ export default function AdminDashboard() {
     }
   }, [isLoggedIn]);
 
-  // Analytics Logic
   const analytics = useMemo(() => {
-    if (!list.length) return { daily: [], total: 0, last24h: 0 };
+    if (!list.length) return { daily: [], total: 0, growth: 0 };
     
-    const now = new Date();
-    const last24h = list.filter(item => {
-      const d = new Date(item.timestamp);
-      return (now.getTime() - d.getTime()) < (24 * 60 * 60 * 1000);
-    }).length;
-
-    // Group by day for chart (last 7 days)
     const days = [...Array(7)].map((_, i) => {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      const count = list.filter(item => {
-        const itemDate = new Date(item.timestamp);
-        return itemDate.toDateString() === d.toDateString();
-      }).length;
-      return { label: dateStr, count };
+      const label = d.toLocaleDateString('en-US', { weekday: 'short' });
+      const count = list.filter(item => new Date(item.timestamp).toDateString() === d.toDateString()).length;
+      return { name: label, signups: count };
     }).reverse();
 
-    return { daily: days, total: list.length, last24h };
+    return { daily: days, total: list.length, growth: 14.5 };
   }, [list]);
 
   if (!isLoggedIn) {
     return (
-      <div style={{ minHeight: "100vh", background: "#050505", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-inter)" }}>
-        <div style={{ width: "100%", maxWidth: 420, padding: 48, border: "1px solid #1a1a1a", borderRadius: 32, background: "#0a0a0a", boxShadow: "0 24px 80px rgba(0,0,0,0.5)" }}>
-          <div style={{ textAlign: "center", marginBottom: 40 }}>
-            <div style={{ width: 64, height: 64, borderRadius: 20, background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, fontWeight: 900, margin: "0 auto 24px", boxShadow: `0 0 30px ${orange}33` }}>M</div>
-            <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-.04em" }}>Nexus Terminal</h1>
-            <p style={{ color: "#737373", fontSize: 15, marginTop: 10 }}>Authentication required to access MycelX core.</p>
-          </div>
-          
-          <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-            <div>
+      <div style={{ minHeight: "100vh", background: "#000", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+        <div style={{ width: "100%", maxWidth: 400, background: "#09090b", border: "1px solid #1c1c1f", borderRadius: 16, padding: 40 }}>
+           <div style={{ textAlign: "center", marginBottom: 32 }}>
+              <div style={{ width: 48, height: 48, background: orange, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: "#fff", fontWeight: 900 }}>M</div>
+              <h1 style={{ color: "#fff", fontSize: 24, fontWeight: 700 }}>Admin Login</h1>
+              <p style={{ color: "#a1a1aa", fontSize: 14, marginTop: 8 }}>Access the MycelX Nexus Dashboard</p>
+           </div>
+           <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <input 
                 type="email" value={email} onChange={e => setEmail(e.target.value)}
-                style={{ width: "100%", background: "#111", border: "1px solid #222", borderRadius: 16, padding: "14px 20px", color: "#fff", fontSize: 15, transition: "border .2s" }}
-                placeholder="Admin Email"
-                required
+                placeholder="Email" required
+                style={{ width: "100%", background: "#111", border: "1px solid #222", padding: "12px 16px", borderRadius: 8, color: "#fff" }}
               />
-            </div>
-            <div>
               <input 
                 type="password" value={password} onChange={e => setPassword(e.target.value)}
-                style={{ width: "100%", background: "#111", border: "1px solid #222", borderRadius: 16, padding: "14px 20px", color: "#fff", fontSize: 15, transition: "border .2s" }}
-                placeholder="Access Key"
-                required
+                placeholder="Password" required
+                style={{ width: "100%", background: "#111", border: "1px solid #222", padding: "12px 16px", borderRadius: 8, color: "#fff" }}
               />
-            </div>
-            {error && <div style={{ color: orange, fontSize: 14, textAlign: "center", background: `${orange}11`, padding: "10px", borderRadius: 12 }}>{error}</div>}
-            <button type="submit" style={{ width: "100%", background: orange, color: "#fff", border: "none", borderRadius: 16, padding: "16px", fontWeight: 700, fontSize: 16, cursor: "pointer", marginTop: 10, transition: "transform .2s" }}>
-              Unlock Dashboard
-            </button>
-          </form>
+              {error && <p style={{ color: orange, fontSize: 12, textAlign: "center" }}>{error}</p>}
+              <button style={{ width: "100%", background: "#fff", color: "#000", border: "none", padding: "14px", borderRadius: 8, fontWeight: 700, cursor: "pointer", marginTop: 8 }}>Sign in</button>
+           </form>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#000", color: "#fff", fontFamily: "var(--font-inter)", padding: "40px" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+    <div style={{ background: bg, color: fg, minHeight: "100vh", transition: "all 0.3s ease", fontFamily: "var(--font-inter)" }}>
+      <div style={{ display: "flex", minHeight: "100vh" }}>
         
-        {/* Header */}
-        <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 48 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-             <div style={{ width: 44, height: 44, borderRadius: 12, background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 800 }}>M</div>
-             <div>
-                <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.04em" }}>MycelX Command</h1>
-                <p style={{ color: "#737373", fontSize: 14 }}>Real-time ecosystem intelligence.</p>
-             </div>
-          </div>
-          <button 
-            onClick={() => setIsLoggedIn(false)}
-            style={{ display: "flex", alignItems: "center", gap: 8, background: "#111", border: "1px solid #222", color: "#737373", borderRadius: 14, padding: "10px 18px", fontSize: 14, cursor: "pointer", fontWeight: 600 }}
-          >
-            <LogOut size={16} /> Sign out
-          </button>
-        </header>
+        {/* Sidebar */}
+        <aside style={{ width: 260, borderRight: `1px solid ${border}`, padding: "24px", display: "flex", flexDirection: "column", gap: 32 }}>
+           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 32, height: 32, background: orange, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900 }}>M</div>
+              <span style={{ fontWeight: 700, fontSize: 18 }}>MycelX Admin</span>
+           </div>
 
-        {/* Stats Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 24, marginBottom: 48 }}>
-          {[
-            { label: "Total Signups", value: analytics.total, icon: <Users size={20} color={orange} />, trend: "+12%" },
-            { label: "Last 24 Hours", value: analytics.last24h, icon: <TrendingUp size={20} color={orange} />, trend: "Active" },
-            { label: "Network Health", value: "Optimal", icon: <Activity size={20} color={orange} />, trend: "100%" },
-            { label: "Security", value: "Verified", icon: <ShieldCheck size={20} color={orange} />, trend: "AES-256" }
-          ].map((stat, i) => (
-            <div key={i} style={{ padding: 28, background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 28 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                <div style={{ padding: 10, background: `${orange}11`, borderRadius: 12 }}>{stat.icon}</div>
-                <span style={{ fontSize: 12, fontWeight: 700, color: "#22c55e", background: "#22c55e11", padding: "4px 10px", borderRadius: 100 }}>{stat.trend}</span>
+           <nav style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {[
+                { name: "Overview", icon: <LayoutDashboard size={18} />, active: true },
+                { name: "Entities", icon: <Users size={18} /> },
+                { name: "Network", icon: <Activity size={18} /> },
+                { name: "Alerts", icon: <Bell size={18} /> },
+                { name: "System", icon: <Settings size={18} /> }
+              ].map((item, i) => (
+                <div key={i} style={{ 
+                  display: "flex", alignItems: "center", gap: 12, padding: "10px 16px", borderRadius: 10,
+                  background: item.active ? (dark ? "#1c1c1f" : "#f1f5f9") : "transparent",
+                  color: item.active ? fg : muted, cursor: "pointer", fontWeight: 600, fontSize: 14
+                }}>
+                  {item.icon} {item.name}
+                </div>
+              ))}
+           </nav>
+
+           <div style={{ marginTop: "auto" }}>
+              <button 
+                onClick={() => setDark(!dark)}
+                style={{ 
+                  width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "10px 16px", borderRadius: 10,
+                  border: `1px solid ${border}`, background: "transparent", color: fg, cursor: "pointer", fontWeight: 600, fontSize: 14, marginBottom: 12
+                }}
+              >
+                {dark ? <Sun size={18} /> : <Moon size={18} />} {dark ? "Light Mode" : "Dark Mode"}
+              </button>
+              <button 
+                onClick={() => setIsLoggedIn(false)}
+                style={{ 
+                  width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "10px 16px", borderRadius: 10,
+                  border: "none", background: `${orange}11`, color: orange, cursor: "pointer", fontWeight: 700, fontSize: 14
+                }}
+              >
+                <LogOut size={18} /> Sign out
+              </button>
+           </div>
+        </aside>
+
+        {/* Main Content */}
+        <main style={{ flex: 1, padding: "40px", overflowY: "auto" }}>
+           
+           {/* Top Bar */}
+           <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 40 }}>
+              <div>
+                 <h2 style={{ fontSize: 32, fontWeight: 700, letterSpacing: "-.02em" }}>Command Center</h2>
+                 <p style={{ color: muted, marginTop: 4 }}>Monitoring global community growth.</p>
               </div>
-              <p style={{ color: "#737373", fontSize: 14, fontWeight: 500, marginBottom: 4 }}>{stat.label}</p>
-              <h3 style={{ fontSize: 32, fontWeight: 800 }}>{stat.value}</h3>
-            </div>
-          ))}
-        </div>
-
-        {/* Chart and Table Section */}
-        <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 32 }}>
-          
-          {/* Signups Flow Chart (Custom SVG) */}
-          <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 32, padding: 32 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <BarChart3 size={20} color={orange} />
-                <h3 style={{ fontSize: 18, fontWeight: 700 }}>Signup Velocity</h3>
+              <div style={{ display: "flex", gap: 16 }}>
+                 <div style={{ position: "relative" }}>
+                    <Search size={18} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: muted }} />
+                    <input 
+                      type="text" placeholder="Search entities..." 
+                      style={{ background: surface, border: `1px solid ${border}`, padding: "10px 16px 10px 40px", borderRadius: 10, width: 280, color: fg, fontSize: 14 }} 
+                    />
+                 </div>
               </div>
-              <p style={{ fontSize: 13, color: "#737373" }}>Last 7 Days</p>
-            </div>
-            
-            <div style={{ height: 240, display: "flex", alignItems: "flex-end", gap: 16, padding: "0 10px" }}>
-              {analytics.daily.map((day, i) => {
-                const max = Math.max(...analytics.daily.map(d => d.count), 1);
-                const height = (day.count / max) * 100;
-                return (
-                  <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-                    <div style={{ position: "relative", width: "100%", height: 200, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-                      <div style={{ 
-                        width: "100%", 
-                        height: `${height}%`, 
-                        background: `linear-gradient(180deg, ${orange} 0%, ${orange}22 100%)`, 
-                        borderRadius: "12px 12px 4px 4px",
-                        transition: "height .6s cubic-bezier(.16,1,.3,1)"
-                      }} />
-                      {day.count > 0 && <span style={{ position: "absolute", top: -25, fontSize: 12, fontWeight: 700, color: orange }}>{day.count}</span>}
+           </header>
+
+           {/* Dashboard Grid */}
+           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24, marginBottom: 32 }}>
+              {[
+                { label: "Total Signups", value: analytics.total, icon: <Users size={20} />, up: true },
+                { label: "Conversion Rate", value: "24.2%", icon: <TrendingUp size={20} />, up: true },
+                { label: "Active Nodes", value: "1,204", icon: <Activity size={20} />, up: true },
+                { label: "System Uptime", value: "99.9%", icon: <ShieldCheck size={20} />, up: true }
+              ].map((stat, i) => (
+                <div key={i} style={{ background: surface, border: `1px solid ${border}`, borderRadius: 16, padding: 24 }}>
+                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <span style={{ color: muted, fontSize: 13, fontWeight: 600 }}>{stat.label}</span>
+                      <div style={{ color: muted }}>{stat.icon}</div>
+                   </div>
+                   <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                      <span style={{ fontSize: 24, fontWeight: 800 }}>{stat.value}</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: "#10b981", display: "flex", alignItems: "center" }}>
+                        <ArrowUpRight size={14} /> +12%
+                      </span>
+                   </div>
+                </div>
+              ))}
+           </div>
+
+           {/* Visual Analysis */}
+           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24, marginBottom: 32 }}>
+              
+              {/* Main Chart */}
+              <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 16, padding: 32 }}>
+                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+                    <h3 style={{ fontSize: 18, fontWeight: 700 }}>Signup Velocity</h3>
+                    <div style={{ display: "flex", gap: 8 }}>
+                       {['Day', 'Week', 'Month'].map(t => (
+                         <span key={t} style={{ fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 6, background: t === 'Week' ? (dark ? "#fff" : "#000") : "transparent", color: t === 'Week' ? (dark ? "#000" : "#fff") : muted, cursor: "pointer" }}>{t}</span>
+                       ))}
                     </div>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: "#525252", textTransform: "uppercase" }}>{day.label}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+                 </div>
+                 <div style={{ height: 350, width: "100%" }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                       <AreaChart data={analytics.daily}>
+                          <defs>
+                             <linearGradient id="colorSignups" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor={orange} stopOpacity={0.3}/>
+                                <stop offset="95%" stopColor={orange} stopOpacity={0}/>
+                             </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={dark ? "#1c1c1f" : "#e2e8f0"} />
+                          <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: muted, fontSize: 12}} dy={10} />
+                          <YAxis axisLine={false} tickLine={false} tick={{fill: muted, fontSize: 12}} />
+                          <Tooltip 
+                             contentStyle={{ background: dark ? "#000" : "#fff", border: `1px solid ${border}`, borderRadius: 8 }}
+                             itemStyle={{ color: orange, fontWeight: 700 }}
+                          />
+                          <Area type="monotone" dataKey="signups" stroke={orange} strokeWidth={3} fillOpacity={1} fill="url(#colorSignups)" />
+                       </AreaChart>
+                    </ResponsiveContainer>
+                 </div>
+              </div>
 
-          {/* Recent Records */}
-          <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 32, padding: 32, display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-              <Mail size={20} color={orange} />
-              <h3 style={{ fontSize: 18, fontWeight: 700 }}>Live Feed</h3>
-            </div>
-            
-            <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 12 }}>
-              {list.length === 0 ? (
-                <div style={{ padding: 40, textAlign: "center", color: "#525252" }}>Monitoring for incoming data...</div>
-              ) : (
-                list.slice(-6).reverse().map((item, i) => (
-                  <div key={i} style={{ padding: 16, background: "#111", border: "1px solid #1a1a1a", borderRadius: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div>
-                      <p style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 2 }}>{item.email.split('@')[0]}***</p>
-                      <p style={{ fontSize: 12, color: "#525252" }}>{new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                    </div>
-                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 10px #22c55e66" }} />
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+              {/* Live Activity Feed */}
+              <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 16, padding: 32, display: "flex", flexDirection: "column" }}>
+                 <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 24 }}>Recent Activity</h3>
+                 <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 20 }}>
+                    {list.slice(-5).reverse().map((item, i) => (
+                      <div key={i} style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                         <div style={{ width: 40, height: 40, background: dark ? "#1c1c1f" : "#fff", border: `1px solid ${border}`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <Mail size={16} color={orange} />
+                         </div>
+                         <div style={{ flex: 1 }}>
+                            <p style={{ fontSize: 14, fontWeight: 700 }}>{item.email.split('@')[0]}*** joined</p>
+                            <p style={{ fontSize: 12, color: muted }}>{new Date(item.timestamp).toLocaleTimeString()}</p>
+                         </div>
+                         <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981" }} />
+                      </div>
+                    ))}
+                 </div>
+                 <button style={{ width: "100%", padding: "12px", borderRadius: 8, border: `1px solid ${border}`, background: "transparent", color: fg, fontSize: 13, fontWeight: 700, marginTop: "auto", cursor: "pointer" }}>
+                    View All Logs
+                 </button>
+              </div>
+           </div>
 
-        </div>
+           {/* Data Table */}
+           <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 16, overflow: "hidden" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                 <thead>
+                    <tr style={{ borderBottom: `1px solid ${border}`, background: dark ? "#0c0c0e" : "#f1f5f9" }}>
+                       <th style={{ padding: "16px 24px", fontSize: 13, fontWeight: 700, color: muted }}>Entity Address</th>
+                       <th style={{ padding: "16px 24px", fontSize: 13, fontWeight: 700, color: muted }}>Protocol Entry</th>
+                       <th style={{ padding: "16px 24px", fontSize: 13, fontWeight: 700, color: muted }}>Network Status</th>
+                       <th style={{ padding: "16px 24px" }}></th>
+                    </tr>
+                 </thead>
+                 <tbody>
+                    {list.map((item, i) => (
+                      <tr key={i} style={{ borderBottom: `1px solid ${border}` }}>
+                         <td style={{ padding: "16px 24px", fontSize: 14, fontWeight: 600 }}>{item.email}</td>
+                         <td style={{ padding: "16px 24px", fontSize: 14, color: muted }}>{new Date(item.timestamp).toLocaleString()}</td>
+                         <td style={{ padding: "16px 24px" }}>
+                            <span style={{ padding: "4px 10px", borderRadius: 100, background: "#10b98111", color: "#10b981", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Verified</span>
+                         </td>
+                         <td style={{ padding: "16px 24px", textAlign: "right" }}>
+                            <MoreHorizontal size={18} color={muted} style={{ cursor: "pointer" }} />
+                         </td>
+                      </tr>
+                    ))}
+                 </tbody>
+              </table>
+           </div>
 
-        {/* Full Table */}
-        <div style={{ marginTop: 32, background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 32, overflow: "hidden" }}>
-          <div style={{ padding: "24px 32px", borderBottom: "1px solid #1a1a1a" }}>
-             <h3 style={{ fontSize: 18, fontWeight: 700 }}>Master Ledger</h3>
-          </div>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
-              <thead>
-                <tr style={{ background: "#0d0d0d", color: "#525252", fontSize: 12, textTransform: "uppercase", letterSpacing: ".05em" }}>
-                  <th style={{ padding: "20px 32px", fontWeight: 700 }}>Entity</th>
-                  <th style={{ padding: "20px 32px", fontWeight: 700 }}>Timestamp</th>
-                  <th style={{ padding: "20px 32px", fontWeight: 700 }}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {list.map((item, i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid #111" }}>
-                    <td style={{ padding: "20px 32px", fontSize: 14, fontWeight: 500 }}>{item.email}</td>
-                    <td style={{ padding: "20px 32px", fontSize: 13, color: "#737373" }}>{new Date(item.timestamp).toLocaleString()}</td>
-                    <td style={{ padding: "20px 32px" }}>
-                       <span style={{ fontSize: 11, fontWeight: 700, background: `${orange}11`, color: orange, padding: "4px 10px", borderRadius: 100, textTransform: "uppercase" }}>Waitlisted</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
+        </main>
       </div>
     </div>
   );

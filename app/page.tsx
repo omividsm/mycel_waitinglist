@@ -58,19 +58,31 @@ const ROADMAP = [
 const TEAM = [
   { 
     name: "Pope", 
-    role: "Co-Founder · Lead", 
+    handle: "omividsm",
+    role: "Co-Founder · Lead Engineer", 
     github: "https://github.com/omividsm", 
     image: "https://github.com/omividsm.png",
+    skills: ["Rust", "Substrate", "React", "TypeScript"],
+    streak: "342 Days",
     initial: "P" 
   },
   { 
     name: "Sanskar Jain", 
-    role: "Co-Founder · Architect", 
+    handle: "sanskarjain09",
+    role: "Co-Founder · Core Architect", 
     github: "https://github.com/sanskarjain09", 
     image: "https://github.com/sanskarjain09.png",
+    skills: ["Solidity", "Go", "Next.js", "GraphQL"],
+    streak: "218 Days",
     initial: "J" 
   }
 ];
+
+const VerifiedBadge = () => (
+  <svg viewBox="0 0 24 24" aria-label="Verified account" width="18" height="18" fill="#FF4D00">
+    <g><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6a3.731 3.731 0 00.148-1.04c0-2.07-1.29-3.75-2.88-3.75-.41 0-.8.11-1.15.3-.65-1.27-2.02-2.14-3.6-2.14-1.58 0-2.95.87-3.6 2.14-.35-.19-.74-.3-1.15-.3-1.59 0-2.88 1.68-2.88 3.75 0 .36.05.7.148 1.04-1.273.65-2.148 2.02-2.148 3.6 0 1.58.875 2.95 2.148 3.6a3.731 3.731 0 00-.148 1.04c0 2.07 1.29 3.75 2.88 3.75.41 0 .8-.11 1.15-.3.65 1.27 2.02 2.14 3.6 2.14 1.58 0 2.95-.87 3.6-2.14.35.19.74.3 1.15.3 1.59 0 2.88-1.68 2.88-3.75 0-.36-.05-.7-.148-1.04 1.273-.65 2.148-2.02 2.148-3.6zm-10.49 4.21L8.33 13l1.45-1.46 2.22 2.21 4.66-4.66 1.45 1.45-6.1 6.17z"></path></g>
+  </svg>
+);
 
 export default function MycelXWaitlist() {
   const [dark, setDark] = useState(true);
@@ -534,36 +546,66 @@ export default function MycelXWaitlist() {
       </section>
 
       {/* ─── TEAM SECTION ─── */}
-      <section className="sp reveal" style={{ padding: "140px 40px" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 24 }}>The Founders</p>
-          <h2 className="dsp" style={{ fontWeight: 800, fontSize: "clamp(36px, 6vw, 64px)", letterSpacing: "-.04em", marginBottom: 80, lineHeight: 1.1, color: fg }}>Engineers of<br />Digital Autonomy.</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40 }} className="stagger-container reveal">
+      <section className="sp reveal" style={{ padding: "160px 40px", position: "relative" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 100 }}>
+            <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 24 }}>The Architects</p>
+            <h2 className="dsp" style={{ fontWeight: 800, fontSize: "clamp(36px, 6vw, 64px)", letterSpacing: "-.04em", lineHeight: 1.1, color: fg }}>Verified Builders.</h2>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }} className="stagger-container reveal">
             {TEAM.map((dev, i) => (
-              <a key={i} href={dev.github} target="_blank" rel="noopener noreferrer" className="hl nl card-feature"
-                style={{ padding: "56px 48px", borderRadius: 48, display: "block", color: fg }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 32, marginBottom: 40 }}>
-                  <div style={{ width: 96, height: 96, borderRadius: 28, background: dark ? fg : "#eee", color: bg, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 36, flexShrink: 0, overflow: "hidden", position: "relative", boxShadow: `0 20px 40px rgba(0,0,0,0.2)` }}>
+              <div key={i} className="card-feature" style={{ padding: "32px", borderRadius: 28, display: "block", color: fg, position: "relative" }}>
+                <div style={{ display: "flex", gap: 16 }}>
+                  {/* Avatar */}
+                  <div style={{ width: 48, height: 48, borderRadius: "50%", background: dark ? "#222" : "#eee", flexShrink: 0, overflow: "hidden", position: "relative" }}>
                     <img 
                       src={dev.image} 
                       alt={dev.name} 
-                      style={{ width: "100%", height: "100%", objectFit: "cover", position: "relative", zIndex: 2 }}
-                      onError={(e) => {
-                        (e.target as any).style.opacity = '0';
-                      }}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
                     />
-                    <span style={{ position: "absolute", zIndex: 1, color: bg }}>{dev.initial}</span>
                   </div>
-                  <div>
-                    <p className="dsp" style={{ fontWeight: 800, fontSize: 28, letterSpacing: "-.02em", marginBottom: 6 }}>{dev.name}</p>
-                    <p style={{ color: muted, fontSize: 18, fontWeight: 500 }}>{dev.role}</p>
+
+                  {/* Post Content */}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 4 }}>
+                      <span style={{ fontWeight: 800, fontSize: 16 }}>{dev.name}</span>
+                      <VerifiedBadge />
+                      <span style={{ color: muted, fontSize: 15 }}>@{dev.handle} · 2h</span>
+                    </div>
+                    
+                    <p style={{ fontSize: 15, lineHeight: 1.5, marginBottom: 16, fontWeight: 500 }}>
+                      Scaling the community layer with {dev.skills.join(", ")}. The MycelX protocol is reaching deep parity.
+                    </p>
+
+                    {/* Meta Info (Skills & Streak) */}
+                    <div style={{ 
+                      background: dark ? "#0a0a0a" : "#fafafa", 
+                      border: `1px solid ${border}`, 
+                      borderRadius: 16, padding: 16, marginBottom: 16,
+                      display: "flex", justifyContent: "space-between", alignItems: "center"
+                    }}>
+                       <div style={{ display: "flex", gap: 8 }}>
+                          {dev.skills.slice(0, 3).map(skill => (
+                            <span key={skill} style={{ fontSize: 12, fontWeight: 700, color: orange }}>#{skill}</span>
+                          ))}
+                       </div>
+                       <div style={{ textAlign: "right" }}>
+                          <p style={{ fontSize: 10, fontWeight: 800, color: muted, textTransform: "uppercase" }}>GitHub Streak</p>
+                          <p style={{ fontSize: 14, fontWeight: 900, color: fg }}>{dev.streak}</p>
+                       </div>
+                    </div>
+
+                    {/* Interaction Bar */}
+                    <div style={{ display: "flex", justifyContent: "space-between", color: muted, paddingRight: 40 }}>
+                       <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}><MessageSquare size={18} /> <span style={{ fontSize: 13 }}>{Math.floor(Math.random() * 50) + 10}</span></div>
+                       <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}><Layers size={18} /> <span style={{ fontSize: 13 }}>{Math.floor(Math.random() * 100) + 20}</span></div>
+                       <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: orange }}><Target size={18} fill={orange} /> <span style={{ fontSize: 13 }}>{Math.floor(Math.random() * 500) + 100}</span></div>
+                       <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}><ArrowRight size={18} /></div>
+                    </div>
                   </div>
                 </div>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: 12, padding: "12px 24px", border: `1px solid ${border}`, borderRadius: 100, fontSize: 15, color: muted, fontWeight: 700 }}>
-                  <Github size={20} />
-                  @{dev.github.split('/').pop()}
-                </div>
-              </a>
+              </div>
             ))}
           </div>
         </div>
