@@ -79,18 +79,49 @@ export default function MycelXWaitlist() {
   const [loading, setLoading] = useState(false);
   const [count, setCount] = useState(847);
   const [scrolled, setScrolled] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
     getWaitingList().then(list => setCount(847 + list.length));
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress((window.scrollY / totalHeight) * 100);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({
+        x: (e.clientX / window.innerWidth - 0.5) * 40,
+        y: (e.clientY / window.innerHeight - 0.5) * 40
+      });
+    };
+
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('mousemove', handleMouseMove);
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('mousemove', handleMouseMove);
+      observer.disconnect();
+    };
   }, []);
 
   const orange = "#FF4D00";
   const bg = dark ? "#000000" : "#ffffff";
   const fg = dark ? "#ffffff" : "#000000";
-  const muted = dark ? "#737373" : "#737373";
+  const muted = "#737373";
   const surface = dark ? "#0a0a0a" : "#fafafa";
   const border = dark ? "#171717" : "#e5e5e5";
   const gridOpacity = dark ? 0.03 : 0.05;
@@ -108,6 +139,14 @@ export default function MycelXWaitlist() {
 
   return (
     <div style={{ background: bg, color: fg, minHeight: "100vh", transition: "background 0.5s cubic-bezier(0.16, 1, 0.3, 1), color 0.5s" }} className="font-inter">
+      
+      {/* Scroll Progress Bar */}
+      <div style={{ 
+        position: "fixed", top: 0, left: 0, height: "2px", 
+        width: `${scrollProgress}%`, background: orange, 
+        zIndex: 1000, transition: "width 0.1s linear" 
+      }} />
+
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
         
@@ -121,33 +160,53 @@ export default function MycelXWaitlist() {
         .dsp { font-family: var(--font-display); }
         .font-inter { font-family: var(--font-inter); }
 
-        @keyframes nodePulse {
-          0%, 100% { transform: scale(1); opacity: 0.4; }
-          50% { transform: scale(1.5); opacity: 0.8; }
+        /* Orb Animations */
+        @keyframes orbPulse {
+          0% { transform: scale(1); opacity: 0.3; }
+          50% { transform: scale(1.1); opacity: 0.6; }
+          100% { transform: scale(1); opacity: 0.3; }
         }
 
-        @keyframes dataFlow {
-          0% { stroke-dashoffset: 100; opacity: 0; }
-          20% { opacity: 1; }
-          80% { opacity: 1; }
-          100% { stroke-dashoffset: 0; opacity: 0; }
+        @keyframes orbRotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
 
-        @keyframes slideIn {
-          from { opacity: 0; transform: translateY(30px); filter: blur(10px); }
-          to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        @keyframes resonance {
+          0% { stroke-dashoffset: 0; stroke-width: 1px; opacity: 0.5; }
+          50% { stroke-dashoffset: 100; stroke-width: 3px; opacity: 1; }
+          100% { stroke-dashoffset: 200; stroke-width: 1px; opacity: 0.5; }
         }
 
-        .animate-slide { animation: slideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.2s; }
-        .delay-3 { animation-delay: 0.3s; }
-        
-        .node { animation: nodePulse 3s infinite ease-in-out; }
-        .data-line { 
-          stroke-dasharray: 10; 
-          animation: dataFlow 5s infinite linear; 
+        /* Scroll Reveal & Stagger */
+        .reveal {
+          opacity: 0;
+          transform: translateY(40px);
+          filter: blur(10px);
+          transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
+
+        .reveal.active {
+          opacity: 1;
+          transform: translateY(0);
+          filter: blur(0);
+        }
+
+        .stagger-container.active > * {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .stagger-container > * {
+          opacity: 0;
+          transform: translateY(20px);
+          transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .stagger-container > *:nth-child(1) { transition-delay: 0.1s; }
+        .stagger-container > *:nth-child(2) { transition-delay: 0.2s; }
+        .stagger-container > *:nth-child(3) { transition-delay: 0.3s; }
+        .stagger-container > *:nth-child(4) { transition-delay: 0.4s; }
 
         .btn-premium {
           background: ${orange};
@@ -165,7 +224,7 @@ export default function MycelXWaitlist() {
         }
 
         .btn-premium:hover {
-          transform: translateY(-2px);
+          transform: translateY(-2px) scale(1.02);
           box-shadow: 0 15px 40px ${orange}55;
         }
 
@@ -177,17 +236,23 @@ export default function MycelXWaitlist() {
         }
         
         .card-feature:hover {
-          border-color: ${orange}44 !important;
+          border-color: ${orange}66 !important;
           transform: translateY(-8px);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: ${dark ? "#222" : "#ccc"}; border-radius: 10px; }
 
+        @keyframes moveAlong {
+          from { offset-distance: 0%; }
+          to { offset-distance: 100%; }
+        }
+
         @media (max-width: 768px) {
-          .hhl { font-size: 52px !important; }
-          .sp { padding: 80px 24px !important; }
+          .hhl { font-size: 42px !important; }
+          .sp { padding: 60px 24px !important; }
           .hide-mobile { display: none !important; }
         }
       `}</style>
@@ -208,21 +273,22 @@ export default function MycelXWaitlist() {
           </div>
           
           <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-            <a href="#features" className="hide-mobile" style={{ fontSize: 13, fontWeight: 600, color: muted, textDecoration: "none" }}>Features</a>
+            <a href="#features" className="hide-mobile" style={{ fontSize: 13, fontWeight: 700, color: muted, textDecoration: "none", textTransform: "uppercase", letterSpacing: "0.1em" }}>Features</a>
+            <a href="#roadmap" className="hide-mobile" style={{ fontSize: 13, fontWeight: 700, color: muted, textDecoration: "none", textTransform: "uppercase", letterSpacing: "0.1em" }}>Roadmap</a>
             
             <button onClick={() => setDark(!dark)} style={{ 
               background: dark ? "#111" : "#f5f5f5", 
               border: `1px solid ${border}`,
-              padding: "6px 12px", borderRadius: 100, 
+              padding: "8px 16px", borderRadius: 100, 
               display: "flex", alignItems: "center", gap: 8,
-              cursor: "pointer", color: fg, fontSize: 12, fontWeight: 700
+              cursor: "pointer", color: fg, fontSize: 11, fontWeight: 800
             }}>
               {dark ? <Sun size={14} /> : <Moon size={14} />}
-              {dark ? "Light" : "Dark"}
+              {dark ? "Deep" : "Light"}
             </button>
 
-            <button className="btn-premium" style={{ padding: "8px 18px", fontSize: 13 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              Join Waitlist
+            <button className="btn-premium" style={{ padding: "10px 22px", fontSize: 13 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              Connect
             </button>
           </div>
         </div>
@@ -231,69 +297,86 @@ export default function MycelXWaitlist() {
       {/* ─── HERO SECTION ─── */}
       <section style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", paddingTop: 100 }}>
         
-        {/* Node Connecting Animation Background */}
-        <div style={{ position: "absolute", inset: 0, pointerEvents: "none", opacity: dark ? 0.6 : 0.4 }}>
-          <svg width="100%" height="100%" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <radialGradient id="nodeGrad" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor={orange} stopOpacity="0.8" />
-                <stop offset="100%" stopColor={orange} stopOpacity="0" />
-              </radialGradient>
-            </defs>
+        {/* Resonating Orb Background with Mouse Interaction */}
+        <div style={{ 
+          position: "absolute", inset: 0, pointerEvents: "none", 
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transform: `translate(${mousePos.x}px, ${mousePos.y}px)`,
+          transition: "transform 0.2s ease-out"
+        }}>
+          <div style={{ position: "relative", width: "800px", height: "800px" }}>
+            <div style={{
+              position: "absolute", inset: "25%",
+              background: `radial-gradient(circle, ${orange} 0%, transparent 70%)`,
+              filter: "blur(60px)",
+              opacity: dark ? 0.3 : 0.2,
+              animation: "orbPulse 8s infinite ease-in-out"
+            }} />
             
-            {/* Connection Lines */}
-            <g stroke={orange} strokeWidth="0.5" opacity="0.15">
-              <path className="data-line" d="M200,200 L500,500 M500,500 L800,200 M500,500 L500,800 M200,200 L200,800 L800,800 L800,200" fill="none" />
-              <path className="data-line" d="M100,500 L900,500 M500,100 L500,900" style={{ animationDelay: "-2s" }} fill="none" />
-            </g>
-
-            {/* Pulsing Nodes */}
-            {[
-              {x:200, y:200}, {x:500, y:500}, {x:800, y:200}, 
-              {x:500, y:800}, {x:200, y:800}, {x:800, y:800},
-              {x:100, y:500}, {x:900, y:500}, {x:500, y:100}, {x:500, y:900}
-            ].map((p, i) => (
-              <g key={i}>
-                <circle cx={p.x} cy={p.y} r="6" fill={orange} className="node" style={{ animationDelay: `${i * 0.4}s` }} />
-                <circle cx={p.x} cy={p.y} r="20" fill="url(#nodeGrad)" className="node" style={{ animationDelay: `${i * 0.4}s` }} />
+            <svg width="100%" height="100%" viewBox="0 0 1000 1000" style={{ animation: "orbRotate 60s infinite linear" }}>
+              <defs>
+                <linearGradient id="orbGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor={orange} />
+                  <stop offset="50%" stopColor="#FFCC00" />
+                  <stop offset="100%" stopColor="#9333EA" />
+                </linearGradient>
+              </defs>
+              
+              {[...Array(6)].map((_, i) => (
+                <circle
+                  key={i}
+                  cx="500" cy="500"
+                  r={120 + i * 70}
+                  fill="none"
+                  stroke="url(#orbGrad)"
+                  strokeWidth="1"
+                  strokeDasharray={i % 2 === 0 ? "1, 20" : "10, 30"}
+                  opacity={0.4 - i * 0.05}
+                  style={{
+                    animation: `resonance ${6 + i * 4}s infinite linear`,
+                    transformOrigin: "center"
+                  } as any}
+                />
+              ))}
+              <g opacity="0.1">
+                <path d="M500,100 L500,900 M100,500 L900,500" stroke={fg} strokeWidth="0.5" />
+                <circle cx="500" cy="500" r="400" stroke={fg} strokeWidth="0.5" fill="none" />
               </g>
-            ))}
-          </svg>
+            </svg>
+          </div>
         </div>
 
-        {/* Subtle Grid */}
         <div style={{ position: "absolute", inset: 0, opacity: gridOpacity, backgroundImage: `linear-gradient(${fg} 1px,transparent 1px),linear-gradient(90deg,${fg} 1px,transparent 1px)`, backgroundSize: "60px 60px" }} />
 
         <div style={{ position: "relative", zIndex: 10, textAlign: "center", maxWidth: 900, padding: "0 40px" }}>
-          
-          <h1 className="hhl dsp animate-slide delay-1" style={{ fontSize: "clamp(54px, 10vw, 108px)", fontWeight: 800, lineHeight: 0.9, letterSpacing: "-.06em", marginBottom: 32 }}>
+          <h1 className="hhl dsp reveal active" style={{ fontSize: "clamp(54px, 10vw, 108px)", fontWeight: 800, lineHeight: 0.9, letterSpacing: "-.06em", marginBottom: 32 }}>
             Sovereign Thought.<br />
             <span style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", backgroundImage: `linear-gradient(135deg, ${fg} 0%, ${orange} 100%)` }}>
               Decentralized.
             </span>
           </h1>
 
-          <p className="animate-slide delay-2" style={{ fontSize: 19, color: muted, maxWidth: 660, margin: "0 auto 48px", lineHeight: 1.6, fontWeight: 500 }}>
+          <p className="reveal active" style={{ fontSize: 20, color: muted, maxWidth: 660, margin: "0 auto 48px", lineHeight: 1.6, fontWeight: 500, transitionDelay: "0.2s" }}>
             MycelX is a reputation-driven communication protocol. Built on Substrate to eliminate visual noise and empower pure, anonymous intelligence.
           </p>
 
-          <div className="animate-slide delay-3" style={{ maxWidth: 500, margin: "0 auto" }}>
+          <div className="reveal active" style={{ maxWidth: 500, margin: "0 auto", transitionDelay: "0.4s" }}>
             {!submitted ? (
               <div style={{ position: "relative" }}>
                  <div style={{ display: "flex", background: dark ? "#0a0a0a" : "#fff", border: `1px solid ${border}`, borderRadius: 24, padding: "8px", boxShadow: dark ? "0 20px 60px rgba(0,0,0,0.5)" : "0 20px 60px rgba(0,0,0,0.05)" }}>
                     <input 
-                      type="email" placeholder="Your access email..." value={email}
+                      type="email" placeholder="Connect email..." value={email}
                       onChange={e => setEmail(e.target.value)}
                       onKeyDown={e => e.key === "Enter" && handleJoin()}
                       disabled={loading}
                       style={{ flex: 1, background: "transparent", border: "none", color: fg, fontSize: 16, padding: "0 24px", fontWeight: 500 }}
                     />
                     <button className="btn-premium" onClick={handleJoin} disabled={loading || !email}>
-                      {loading ? "Syncing..." : "Get Access"} <ArrowRight size={18} />
+                      {loading ? "Joining..." : "Get Access"} <ArrowRight size={18} />
                     </button>
                  </div>
                  <p style={{ fontSize: 13, color: muted, marginTop: 16, fontWeight: 600 }}>
-                    <Users size={14} style={{ verticalAlign: "middle", marginRight: 6 }} /> <span style={{ color: fg }}>{count.toLocaleString()}</span> nodes currently in waitlist.
+                    <Users size={14} style={{ verticalAlign: "middle", marginRight: 6 }} /> <span style={{ color: fg }}>{count.toLocaleString()}</span> thinkers currently waitlisted.
                  </p>
               </div>
             ) : (
@@ -301,72 +384,118 @@ export default function MycelXWaitlist() {
                 <div style={{ width: 56, height: 56, borderRadius: "50%", background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, flexShrink: 0, boxShadow: `0 10px 20px ${orange}44` }}>✓</div>
                 <div>
                   <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4, color: fg }}>Access Logged.</h3>
-                  <p style={{ color: muted, fontSize: 15, fontWeight: 500 }}>The network will notify you upon activation.</p>
+                  <p style={{ color: muted, fontSize: 15, fontWeight: 500 }}>Welcome to the next layer of community.</p>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        <div style={{ position: "absolute", bottom: 40, left: "50%", transform: "translateX(-50%)", color: muted, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+        <div style={{ position: "absolute", bottom: 40, left: "50%", transform: "translateX(-50%)", color: muted }}>
            <ChevronDown size={20} className="animate-bounce" />
         </div>
       </section>
 
       {/* ─── FEATURES SECTION ─── */}
-      <section id="features" className="sp" style={{ padding: "140px 40px", position: "relative" }}>
+      <section id="features" className="sp" style={{ padding: "160px 40px", position: "relative" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: 80, alignItems: "center", marginBottom: 100 }}>
-             <div>
-                <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 20 }}>The Architecture</p>
-                <h2 className="dsp" style={{ fontSize: "clamp(32px, 5vw, 54px)", fontWeight: 800, lineHeight: 1.1, marginBottom: 32, color: fg }}>Engineered for Sovereignty.</h2>
-                <p style={{ color: muted, fontSize: 18, lineHeight: 1.7, fontWeight: 500 }}>We've stripped away the vanity metrics of modern social web to focus on what actually grows the network: high-fidelity thought and verified reputation.</p>
-             </div>
-             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-                <div className="card-feature" style={{ padding: 40, borderRadius: 32 }}>
-                   <div style={{ width: 50, height: 50, borderRadius: 16, background: `${orange}11`, color: orange, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}><Shield size={24} /></div>
-                   <h4 className="dsp" style={{ fontSize: 20, fontWeight: 700, marginBottom: 12, color: fg }}>Substrate Root</h4>
-                   <p style={{ color: muted, fontSize: 15, lineHeight: 1.6 }}>Enterprise-grade decentralization using the Polkadot ecosystem's core framework.</p>
-                </div>
-                <div className="card-feature" style={{ padding: 40, borderRadius: 32 }}>
-                   <div style={{ width: 50, height: 50, borderRadius: 16, background: `${orange}11`, color: orange, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}><Zap size={24} /></div>
-                   <h4 className="dsp" style={{ fontSize: 20, fontWeight: 700, marginBottom: 12, color: fg }}>Neural Sync</h4>
-                   <p style={{ color: muted, fontSize: 15, lineHeight: 1.6 }}>Real-time synchronization across edge nodes with sub-second latency.</p>
-                </div>
-             </div>
+          <div className="reveal" style={{ textAlign: "center", marginBottom: 120 }}>
+            <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 24 }}>System Capabilities</p>
+            <h2 className="dsp" style={{ fontSize: "clamp(36px, 6vw, 64px)", fontWeight: 800, lineHeight: 1.1, color: fg }}>Living Infrastructure.</h2>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 32 }}>
-            {FEATURES.map((f, i) => (
-              <div key={i} className="card-feature" style={{ padding: 48, borderRadius: 40, position: "relative", overflow: "hidden" }}>
-                <div style={{ position: "absolute", top: 20, right: 20, fontSize: 11, fontWeight: 800, color: muted, background: dark ? "#111" : "#eee", padding: "4px 12px", borderRadius: 100 }}>{f.tag}</div>
-                <div style={{ width: 64, height: 64, borderRadius: 20, background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 32, boxShadow: `0 10px 20px ${orange}33` }}>{f.icon}</div>
-                <h3 className="dsp" style={{ fontSize: 24, fontWeight: 800, marginBottom: 16, color: fg }}>{f.title}</h3>
-                <p style={{ color: muted, fontSize: 16, lineHeight: 1.8, fontWeight: 500 }}>{f.body}</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 40 }} className="stagger-container reveal">
+            {/* Feature 1: Pure Intelligence */}
+            <div className="card-feature" style={{ padding: 60, borderRadius: 56, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", gap: 40 }}>
+              <div style={{ height: 160, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="100%" height="100%" viewBox="0 0 200 200">
+                  <circle cx="100" cy="100" r="10" fill={orange} className="node" />
+                  {[...Array(8)].map((_, i) => (
+                    <g key={i} style={{ transform: `rotate(${i * 45}deg)`, transformOrigin: "100px 100px" }}>
+                      <path d="M100,60 L100,90" stroke={orange} strokeWidth="1" strokeDasharray="5,5" className="data-line" style={{ animationDelay: `${i * 0.2}s` }} />
+                      <circle cx="100" cy="50" r="4" fill={orange} opacity="0.3" />
+                    </g>
+                  ))}
+                  <circle cx="100" cy="100" r="40" stroke={orange} strokeWidth="0.5" opacity="0.1" fill="none" />
+                </svg>
               </div>
-            ))}
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 900, color: muted, background: dark ? "#111" : "#eee", padding: "6px 16px", borderRadius: 100, letterSpacing: "0.05em", width: "fit-content", marginBottom: 20 }}>TEXT-FIRST</div>
+                <h3 className="dsp" style={{ fontSize: 26, fontWeight: 800, marginBottom: 16, color: fg }}>Intelligence Hub</h3>
+                <p style={{ color: muted, fontSize: 16, lineHeight: 1.8, fontWeight: 500 }}>
+                  A central processing node for high-fidelity thought. Eliminating visual noise to empower pure intelligence.
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 2: Fractal Identity */}
+            <div className="card-feature" style={{ padding: 60, borderRadius: 56, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", gap: 40 }}>
+              <div style={{ height: 160, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="100%" height="100%" viewBox="0 0 200 200">
+                  <g style={{ animation: "orbRotate 10s infinite linear", transformOrigin: "center" }}>
+                    <circle cx="100" cy="100" r="15" stroke={orange} strokeWidth="1" fill="none" />
+                    <circle cx="70" cy="100" r="8" fill={orange} className="node" />
+                    <circle cx="130" cy="70" r="8" fill={orange} className="node" style={{ animationDelay: "1s" }} />
+                    <circle cx="130" cy="130" r="8" fill={orange} className="node" style={{ animationDelay: "2s" }} />
+                    <path d="M70,100 L100,100 M130,70 L100,100 M130,130 L100,100" stroke={orange} strokeWidth="1" opacity="0.2" />
+                  </g>
+                  <circle cx="100" cy="100" r="50" stroke={orange} strokeWidth="0.5" opacity="0.1" fill="none" strokeDasharray="2,10" />
+                </svg>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 900, color: muted, background: dark ? "#111" : "#eee", padding: "6px 16px", borderRadius: 100, letterSpacing: "0.05em", width: "fit-content", marginBottom: 20 }}>FRACTIONAL</div>
+                <h3 className="dsp" style={{ fontSize: 26, fontWeight: 800, marginBottom: 16, color: fg }}>Identity Layers</h3>
+                <p style={{ color: muted, fontSize: 16, lineHeight: 1.8, fontWeight: 500 }}>
+                  Fractal personas that adapt to the community. You control which node of your identity is active.
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 3: Economic Layer */}
+            <div className="card-feature" style={{ padding: 60, borderRadius: 56, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", gap: 40 }}>
+              <div style={{ height: 160, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="100%" height="100%" viewBox="0 0 200 200">
+                  <rect x="75" y="75" width="50" height="50" rx="10" stroke={orange} strokeWidth="1" fill="none" style={{ animation: "orbRotate 5s infinite ease-in-out", transformOrigin: "center" }} />
+                  {[...Array(4)].map((_, i) => (
+                    <circle key={i} cx="100" cy="100" r="6" fill={orange} style={{ 
+                      offsetPath: "path('M100,60 A40,40 0 1,1 100,140 A40,40 0 1,1 100,60')",
+                      animation: `nodePulse 3s infinite linear, moveAlong ${4 + i}s infinite linear`,
+                      animationDelay: `${i * 1}s`
+                    } as any} />
+                  ))}
+                  <path d="M100,60 A40,40 0 1,1 100,140 A40,40 0 1,1 100,60" stroke={orange} strokeWidth="0.5" opacity="0.1" fill="none" />
+                </svg>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 900, color: muted, background: dark ? "#111" : "#eee", padding: "6px 16px", borderRadius: 100, letterSpacing: "0.05em", width: "fit-content", marginBottom: 20 }}>SUBSTRATE</div>
+                <h3 className="dsp" style={{ fontSize: 26, fontWeight: 800, marginBottom: 16, color: fg }}>Economic Pulse</h3>
+                <p style={{ color: muted, fontSize: 16, lineHeight: 1.8, fontWeight: 500 }}>
+                  Native $MYC circulation. A real token economy where every node contributes and earns value.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ─── ROADMAP SECTION ─── */}
-      <section id="roadmap" className="sp" style={{ padding: "120px 40px", background: dark ? "#050505" : "#fafafa", borderTop: `1px solid ${border}`, borderBottom: `1px solid ${border}` }}>
+      <section id="roadmap" className="sp reveal" style={{ padding: "120px 40px", background: dark ? "#050505" : "#fafafa", borderTop: `1px solid ${border}`, borderBottom: `1px solid ${border}` }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-           <div style={{ textAlign: "center", marginBottom: 80 }}>
-              <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 20 }}>System Lifecycle</p>
-              <h2 className="dsp" style={{ fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 800, color: fg }}>Operational Roadmap</h2>
+           <div style={{ textAlign: "center", marginBottom: 100 }}>
+              <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 20 }}>Lifecycle</p>
+              <h2 className="dsp" style={{ fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 800, color: fg }}>Protocol Evolution</h2>
            </div>
            
-           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 40 }}>
+           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 60 }} className="stagger-container reveal">
               {ROADMAP.map((item, i) => (
                 <div key={i} style={{ position: "relative" }}>
-                   <div style={{ fontSize: 64, fontWeight: 900, color: dark ? "#111" : "#eee", position: "absolute", top: -40, left: 0, zIndex: 0 }}>{item.step}</div>
+                   <div style={{ fontSize: 84, fontWeight: 900, color: dark ? "#111" : "#eee", position: "absolute", top: -60, left: 0, zIndex: 0 }}>{item.step}</div>
                    <div style={{ position: "relative", zIndex: 1, padding: "40px 0" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-                         <h3 className="dsp" style={{ fontSize: 24, fontWeight: 800, color: fg }}>{item.title}</h3>
-                         <span style={{ fontSize: 11, fontWeight: 800, background: item.status === "Active" ? `${orange}22` : (dark ? "#111" : "#eee"), color: item.status === "Active" ? orange : muted, padding: "4px 10px", borderRadius: 100 }}>{item.status}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
+                         <h3 className="dsp" style={{ fontSize: 26, fontWeight: 800, color: fg }}>{item.title}</h3>
+                         <span style={{ fontSize: 11, fontWeight: 900, background: item.status === "Active" ? `${orange}22` : (dark ? "#111" : "#eee"), color: item.status === "Active" ? orange : muted, padding: "6px 14px", borderRadius: 100, letterSpacing: "0.05em" }}>{item.status}</span>
                       </div>
-                      <p style={{ color: muted, fontSize: 16, lineHeight: 1.7, fontWeight: 500 }}>{item.desc}</p>
+                      <p style={{ color: muted, fontSize: 17, lineHeight: 1.7, fontWeight: 500 }}>{item.desc}</p>
                    </div>
                 </div>
               ))}
@@ -375,28 +504,28 @@ export default function MycelXWaitlist() {
       </section>
 
       {/* ─── TOKEN SECTION ─── */}
-      <section style={{ padding: "160px 40px", textAlign: "center", overflow: "hidden" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto", position: "relative" }}>
+      <section className="reveal" style={{ padding: "180px 40px", textAlign: "center", overflow: "hidden" }}>
+        <div style={{ maxWidth: 1000, margin: "0 auto", position: "relative" }}>
            <div style={{ 
               position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", 
-              width: 500, height: 500, background: orange, borderRadius: "50%", filter: "blur(180px)", opacity: 0.1, zIndex: 0 
+              width: 600, height: 600, background: orange, borderRadius: "50%", filter: "blur(200px)", opacity: 0.12, zIndex: 0 
            }} />
            <div style={{ position: "relative", zIndex: 1 }}>
-              <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 24 }}>Native Asset</p>
-              <h2 className="dsp" style={{ fontSize: "clamp(80px, 15vw, 180px)", fontWeight: 900, lineHeight: 0.8, letterSpacing: "-.08em", marginBottom: 40, color: fg }}>$MYC</h2>
-              <p style={{ color: muted, fontSize: 20, lineHeight: 1.7, maxWidth: 600, margin: "0 auto 64px", fontWeight: 500 }}>
+              <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 32 }}>Economic Asset</p>
+              <h2 className="dsp" style={{ fontSize: "clamp(80px, 18vw, 220px)", fontWeight: 900, lineHeight: 0.8, letterSpacing: "-.08em", marginBottom: 48, color: fg }}>$MYC</h2>
+              <p style={{ color: muted, fontSize: 22, lineHeight: 1.7, maxWidth: 660, margin: "0 auto 80px", fontWeight: 500 }}>
                 The fuel for the Mycelium economy. Required for node hosting, advanced identity layers, and governance weight.
               </p>
-              <div style={{ display: "flex", justifyContent: "center", gap: 60, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", justifyContent: "center", gap: 80, flexWrap: "wrap" }} className="stagger-container reveal">
                  {[
-                   { label: "Earn", icon: <TrendingUpIcon size={24} />, desc: "Growth Nodes" },
-                   { label: "Stake", icon: <Lock size={24} />, desc: "Weight Control" },
-                   { label: "Utilize", icon: <Zap size={24} />, desc: "Access Keys" }
+                   { label: "Earn", icon: <TrendingUpIcon size={28} />, desc: "Growth Nodes" },
+                   { label: "Stake", icon: <Lock size={28} />, desc: "Weight Control" },
+                   { label: "Utilize", icon: <Zap size={28} />, desc: "Access Keys" }
                  ].map((box, i) => (
                    <div key={i} style={{ textAlign: "center" }}>
-                      <div className="card-feature" style={{ width: 64, height: 64, borderRadius: 20, color: orange, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>{box.icon}</div>
-                      <h4 className="dsp" style={{ fontSize: 22, fontWeight: 800, marginBottom: 4, color: fg }}>{box.label}</h4>
-                      <p style={{ fontSize: 13, color: muted, fontWeight: 600 }}>{box.desc}</p>
+                      <div className="card-feature" style={{ width: 72, height: 72, borderRadius: 24, color: orange, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>{box.icon}</div>
+                      <h4 className="dsp" style={{ fontSize: 24, fontWeight: 800, marginBottom: 8, color: fg }}>{box.label}</h4>
+                      <p style={{ fontSize: 14, color: muted, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>{box.desc}</p>
                    </div>
                  ))}
               </div>
@@ -405,16 +534,16 @@ export default function MycelXWaitlist() {
       </section>
 
       {/* ─── TEAM SECTION ─── */}
-      <section className="sp" style={{ padding: "120px 40px" }}>
-        <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-          <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 20 }}>The Founders</p>
-          <h2 className="dsp" style={{ fontWeight: 800, fontSize: "clamp(32px, 5vw, 56px)", letterSpacing: "-.04em", marginBottom: 60, lineHeight: 1.1, color: fg }}>Engineers of<br />Digital Autonomy.</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
+      <section className="sp reveal" style={{ padding: "140px 40px" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 24 }}>The Founders</p>
+          <h2 className="dsp" style={{ fontWeight: 800, fontSize: "clamp(36px, 6vw, 64px)", letterSpacing: "-.04em", marginBottom: 80, lineHeight: 1.1, color: fg }}>Engineers of<br />Digital Autonomy.</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40 }} className="stagger-container reveal">
             {TEAM.map((dev, i) => (
               <a key={i} href={dev.github} target="_blank" rel="noopener noreferrer" className="hl nl card-feature"
-                style={{ padding: "48px 40px", borderRadius: 40, display: "block", color: fg }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 24, marginBottom: 32 }}>
-                  <div style={{ width: 80, height: 80, borderRadius: 24, background: dark ? fg : "#eee", color: bg, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 32, flexShrink: 0, overflow: "hidden", position: "relative" }}>
+                style={{ padding: "56px 48px", borderRadius: 48, display: "block", color: fg }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 32, marginBottom: 40 }}>
+                  <div style={{ width: 96, height: 96, borderRadius: 28, background: dark ? fg : "#eee", color: bg, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 36, flexShrink: 0, overflow: "hidden", position: "relative", boxShadow: `0 20px 40px rgba(0,0,0,0.2)` }}>
                     <img 
                       src={dev.image} 
                       alt={dev.name} 
@@ -426,12 +555,12 @@ export default function MycelXWaitlist() {
                     <span style={{ position: "absolute", zIndex: 1, color: bg }}>{dev.initial}</span>
                   </div>
                   <div>
-                    <p className="dsp" style={{ fontWeight: 800, fontSize: 24, letterSpacing: "-.02em", marginBottom: 4 }}>{dev.name}</p>
-                    <p style={{ color: muted, fontSize: 16, fontWeight: 500 }}>{dev.role}</p>
+                    <p className="dsp" style={{ fontWeight: 800, fontSize: 28, letterSpacing: "-.02em", marginBottom: 6 }}>{dev.name}</p>
+                    <p style={{ color: muted, fontSize: 18, fontWeight: 500 }}>{dev.role}</p>
                   </div>
                 </div>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "10px 20px", border: `1px solid ${border}`, borderRadius: 100, fontSize: 14, color: muted, fontWeight: 600 }}>
-                  <Github size={18} />
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 12, padding: "12px 24px", border: `1px solid ${border}`, borderRadius: 100, fontSize: 15, color: muted, fontWeight: 700 }}>
+                  <Github size={20} />
                   @{dev.github.split('/').pop()}
                 </div>
               </a>
@@ -441,20 +570,20 @@ export default function MycelXWaitlist() {
       </section>
 
       {/* ─── FAQ SECTION ─── */}
-      <section style={{ padding: "100px 40px", background: dark ? "#050505" : "#fafafa" }}>
-        <div style={{ maxWidth: 800, margin: "0 auto" }}>
-           <h2 className="dsp" style={{ fontSize: 32, fontWeight: 800, marginBottom: 60, textAlign: "center", color: fg }}>Deep Logic</h2>
-           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <section className="reveal" style={{ padding: "120px 40px", background: dark ? "#050505" : "#fafafa" }}>
+        <div style={{ maxWidth: 850, margin: "0 auto" }}>
+           <h2 className="dsp" style={{ fontSize: 36, fontWeight: 800, marginBottom: 80, textAlign: "center", color: fg }}>Deep Logic</h2>
+           <div style={{ display: "flex", flexDirection: "column", gap: 20 }} className="stagger-container reveal">
               {[
                 { q: "Is MycelX a social network?", a: "No. MycelX is a reputation protocol for text-first communication. It can power social networks, but its primary function is identity and value exchange." },
                 { q: "How is it anonymous?", a: "Users utilize cryptographic keys and fractional identities. You control how much metadata you reveal to any specific community node." },
                 { q: "What is Substrate?", a: "A modular blockchain framework that allows us to build a high-performance, custom-tailored chain specifically for text-first data." }
               ].map((item, i) => (
-                <div key={i} className="card-feature" style={{ padding: 32, borderRadius: 24 }}>
-                   <h4 className="dsp" style={{ fontSize: 18, fontWeight: 800, marginBottom: 12, display: "flex", alignItems: "center", gap: 12, color: fg }}>
-                      <Target size={18} color={orange} /> {item.q}
+                <div key={i} className="card-feature" style={{ padding: 40, borderRadius: 32 }}>
+                   <h4 className="dsp" style={{ fontSize: 20, fontWeight: 800, marginBottom: 16, display: "flex", alignItems: "center", gap: 16, color: fg }}>
+                      <Target size={20} color={orange} /> {item.q}
                    </h4>
-                   <p style={{ color: muted, fontSize: 15, lineHeight: 1.6, fontWeight: 500 }}>{item.a}</p>
+                   <p style={{ color: muted, fontSize: 16, lineHeight: 1.7, fontWeight: 500 }}>{item.a}</p>
                 </div>
               ))}
            </div>
@@ -462,36 +591,36 @@ export default function MycelXWaitlist() {
       </section>
 
       {/* ─── FOOTER ─── */}
-      <footer style={{ padding: "80px 40px", borderTop: `1px solid ${border}` }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr", gap: 60 }}>
+      <footer style={{ padding: "100px 40px", borderTop: `1px solid ${border}` }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr", gap: 80 }}>
            <div>
-              <div className="dsp" style={{ fontWeight: 800, fontSize: 24, letterSpacing: "-.04em", display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 900 }}>M</div>
+              <div className="dsp" style={{ fontWeight: 800, fontSize: 28, letterSpacing: "-.04em", display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 900 }}>M</div>
                 <span style={{ color: fg }}>MycelX</span>
               </div>
-              <p style={{ color: muted, fontSize: 15, lineHeight: 1.6, maxWidth: 300, fontWeight: 500 }}>The next generation of decentralized community architecture. Built on Substrate.</p>
+              <p style={{ color: muted, fontSize: 16, lineHeight: 1.7, maxWidth: 320, fontWeight: 500 }}>The next generation of decentralized community architecture. Built on Substrate.</p>
            </div>
            <div>
-              <h5 style={{ fontSize: 14, fontWeight: 800, color: fg, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 24 }}>Developers</h5>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <h5 style={{ fontSize: 14, fontWeight: 800, color: fg, textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 32 }}>Developers</h5>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                  {TEAM.map((dev, i) => (
-                   <a key={i} href={dev.github} style={{ color: muted, fontSize: 14, textDecoration: "none", fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
-                      <Github size={16} /> {dev.name}
+                   <a key={i} href={dev.github} style={{ color: muted, fontSize: 15, textDecoration: "none", fontWeight: 700, display: "flex", alignItems: "center", gap: 10 }}>
+                      <Github size={18} /> {dev.name}
                    </a>
                  ))}
               </div>
            </div>
            <div>
-              <h5 style={{ fontSize: 14, fontWeight: 800, color: fg, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 24 }}>Connect</h5>
-              <div style={{ display: "flex", gap: 20 }}>
-                 <a href="#" style={{ width: 44, height: 44, borderRadius: 12, background: surface, border: `1px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "center", color: muted }}><Twitter size={20} /></a>
-                 <a href="#" style={{ width: 44, height: 44, borderRadius: 12, background: surface, border: `1px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "center", color: muted }}><Github size={20} /></a>
+              <h5 style={{ fontSize: 14, fontWeight: 800, color: fg, textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 32 }}>Connect</h5>
+              <div style={{ display: "flex", gap: 24 }}>
+                 <a href="#" style={{ width: 52, height: 52, borderRadius: 16, background: surface, border: `1px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "center", color: muted, transition: "all 0.3s" }} className="card-feature"><Twitter size={24} /></a>
+                 <a href="#" style={{ width: 52, height: 52, borderRadius: 16, background: surface, border: `1px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "center", color: muted, transition: "all 0.3s" }} className="card-feature"><Github size={24} /></a>
               </div>
            </div>
         </div>
-        <div style={{ maxWidth: 1200, margin: "60px auto 0", paddingTop: 40, borderTop: `1px solid ${border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-           <p style={{ color: muted, fontSize: 12, fontWeight: 700 }}>© 2026 MYCELX PROTOCOL · ALL RIGHTS RESERVED</p>
-           <p style={{ color: muted, fontSize: 12, fontWeight: 700 }}>SECURED BY SUBSTRATE · AES-256</p>
+        <div style={{ maxWidth: 1200, margin: "80px auto 0", paddingTop: 40, borderTop: `1px solid ${border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+           <p style={{ color: muted, fontSize: 12, fontWeight: 800, letterSpacing: "0.05em" }}>© 2026 MYCELX PROTOCOL · ALL RIGHTS RESERVED</p>
+           <p style={{ color: muted, fontSize: 12, fontWeight: 800, letterSpacing: "0.05em" }}>SECURED BY SUBSTRATE · AES-256</p>
         </div>
       </footer>
     </div>
