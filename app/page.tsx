@@ -567,7 +567,11 @@ export default function MycelXWaitlist() {
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 64 }}>
            <div>
               <div className="dsp" style={{ fontWeight: 800, fontSize: 28, letterSpacing: "-.04em", display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 900 }}>M</div>
+                <img 
+                  src="/assets/ChatGPT Image Jun 11, 2026, 01_36_29 PM.png" 
+                  alt="MycelX Logo" 
+                  style={{ width: 44, height: 44, borderRadius: 12, objectFit: "cover" }} 
+                />
                 <span style={{ color: fg }}>MycelX</span>
               </div>
               <p style={{ color: muted, fontSize: 16, lineHeight: 1.7, maxWidth: 320, fontWeight: 500 }}>The next generation of decentralized community architecture. Built on Substrate.</p>

@@ -261,7 +261,11 @@ export default function AdminDashboard() {
            <div style={{ marginTop: "auto" }}>
               <div style={{ padding: 16, background: surface, border: `1px solid ${border}`, borderRadius: 16, marginBottom: 24 }}>
                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 32, height: 32, borderRadius: "50%", background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 900 }}>A</div>
+                    <img 
+                      src="/assets/ChatGPT Image Jun 11, 2026, 01_36_29 PM.png" 
+                      alt="Admin" 
+                      style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }} 
+                    />
                     <div style={{ overflow: "hidden" }}>
                        <p style={{ fontSize: 13, fontWeight: 800, whiteSpace: "nowrap", textOverflow: "ellipsis" }}>{ADMIN_EMAILS[0]}</p>
                        <p style={{ fontSize: 11, color: "#10b981", fontWeight: 700 }}>Root Admin</p>
