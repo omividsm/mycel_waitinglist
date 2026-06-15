@@ -31,6 +31,14 @@ import {
   Activity,
   MousePointer2
 } from "lucide-react";
+import {
+  ComposableMap,
+  Geographies,
+  Geography,
+  Marker
+} from "react-simple-maps";
+
+const geoUrl = "https://unpkg.com/world-atlas@2.0.2/countries-110m.json";
 
 // Custom SVG Icons to avoid naming issues
 const GithubIcon = (props: any) => (
@@ -104,11 +112,11 @@ const TASKS = [
 ];
 
 const WORLD_REGIONS = [
-  { name: "North America", x: 25, y: 35, traction: "892 Nodes", traffic: "High" },
-  { name: "Europe", x: 52, y: 30, traction: "1,204 Nodes", traffic: "Critical" },
-  { name: "Asia Pacific", x: 75, y: 45, traction: "567 Nodes", traffic: "Growing" },
-  { name: "South America", x: 35, y: 70, traction: "214 Nodes", traffic: "Emerging" },
-  { name: "Africa", x: 52, y: 60, traction: "148 Nodes", traffic: "Active" }
+  { name: "North America", coordinates: [-100, 40], traction: "892 Nodes", traffic: "High" },
+  { name: "Europe", coordinates: [15, 50], traction: "1,204 Nodes", traffic: "Critical" },
+  { name: "Asia Pacific", coordinates: [120, 20], traction: "567 Nodes", traffic: "Growing" },
+  { name: "South America", coordinates: [-60, -20], traction: "214 Nodes", traffic: "Emerging" },
+  { name: "Africa", coordinates: [20, 0], traction: "148 Nodes", traffic: "Active" }
 ];
 
 const VerifiedBadge = () => (
@@ -356,17 +364,40 @@ export default function MycelXWaitlist() {
               </div>
 
               <div style={{ position: "relative", aspectRatio: "16/9", background: dark ? "#0a0a0a" : "#eee", borderRadius: 40, border: `1px solid ${border}`, overflow: "hidden" }}>
-                 <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-                    <path d="M10,20 Q30,10 50,20 T90,20 M10,40 Q30,30 50,40 T90,40 M10,60 Q30,50 50,60 T90,60 M10,80 Q30,70 50,80 T90,80" stroke={muted} strokeWidth="0.1" opacity="0.2" fill="none" />
-                    {WORLD_REGIONS.map((region) => (
-                      <g key={region.name} onClick={() => setSelectedRegion(region)} style={{ cursor: "pointer" }}>
-                         <circle cx={region.x} cy={region.y} r="2" fill={orange} className="node">
-                            <title>{region.name}</title>
-                         </circle>
-                         <circle cx={region.x} cy={region.y} r="6" stroke={orange} strokeWidth="0.5" fill="none" className="ping" />
-                      </g>
-                    ))}
-                 </svg>
+                 <ComposableMap
+                   projectionConfig={{
+                     scale: 140,
+                   }}
+                   style={{
+                     width: "100%",
+                     height: "100%",
+                   }}
+                 >
+                   <Geographies geography={geoUrl}>
+                     {({ geographies }) =>
+                       geographies.map((geo) => (
+                         <Geography
+                           key={geo.rsmKey}
+                           geography={geo}
+                           fill={dark ? "#1a1a1a" : "#ddd"}
+                           stroke={dark ? "#333" : "#bbb"}
+                           strokeWidth={0.5}
+                           style={{
+                             default: { outline: "none" },
+                             hover: { fill: orange, outline: "none", transition: "all 250ms" },
+                             pressed: { outline: "none" },
+                           }}
+                         />
+                       ))
+                     }
+                   </Geographies>
+                   {WORLD_REGIONS.map((region) => (
+                     <Marker key={region.name} coordinates={region.coordinates as [number, number]} onClick={() => setSelectedRegion(region)}>
+                       <circle r={4} fill={orange} stroke="#fff" strokeWidth={1} style={{ cursor: "pointer" }} />
+                       <circle r={12} fill={orange} opacity={0.3} className="ping" style={{ cursor: "pointer" }} />
+                     </Marker>
+                   ))}
+                 </ComposableMap>
                  <div style={{ position: "absolute", bottom: 20, right: 24, fontSize: 10, fontWeight: 800, color: muted, textTransform: "uppercase" }}>Real-time Node Distribution</div>
               </div>
            </div>
