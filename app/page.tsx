@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from "react";
-import { joinWaitingList, getWaitingList } from "./actions";
+import { useState, useEffect, useMemo } from "react";
+import { joinWaitingList, getWaitingList, getAlerts } from "./actions";
 import { 
   Zap, 
   Shield, 
@@ -21,7 +21,13 @@ import {
   Terminal,
   Menu,
   X,
-  CheckCircle2
+  CheckCircle2,
+  Bell,
+  Cpu,
+  Database,
+  Search,
+  Code,
+  Globe
 } from "lucide-react";
 
 // Custom SVG Icons to avoid naming issues and build errors
@@ -49,6 +55,13 @@ const FEATURES = [
     body: "A native Substrate-based token economy. Earn rewards for value creation. Built-in liquidity from day zero.",
     tag: "SUBSTRATE"
   }
+];
+
+const TECH_STACK = [
+  { name: "Rust", icon: <Code size={20} />, desc: "Primary logic for safety and speed." },
+  { name: "Substrate", icon: <Database size={20} />, desc: "Modular blockchain framework." },
+  { name: "Polkadot", icon: <Globe size={20} />, desc: "Cross-chain interoperability layer." },
+  { name: "Wasm", icon: <Cpu size={20} />, desc: "High-performance smart execution." }
 ];
 
 const ROADMAP = [
@@ -83,9 +96,9 @@ const TEAM = [
 ];
 
 const TASKS = [
-  { id: 1, title: "Identity Verification", reward: "50 $MYC", icon: <Shield size={20} />, desc: "Link your GitHub and verify your developer reputation." },
-  { id: 2, title: "Node Contribution", reward: "100 $MYC", icon: <Zap size={20} />, desc: "Contribute to the text-first corpus by publishing a technical thought." },
-  { id: 3, title: "Ecosystem Growth", reward: "25 $MYC", icon: <Users size={20} />, desc: "Invite a fellow builder to the MycelX waitlist." }
+  { id: 1, title: "Protocol Contribution", reward: "250 $MYC", icon: <Code size={20} />, desc: "Submit a pull request to our core Substrate repository." },
+  { id: 2, title: "Security Audit", reward: "500 $MYC", icon: <Shield size={20} />, desc: "Identify and document potential identity layer vulnerabilities." },
+  { id: 3, title: "Market Growth", reward: "150 $MYC", icon: <TrendingUpIcon size={20} />, desc: "Onboard 5 verified developers to the waitlist." }
 ];
 
 const VerifiedBadge = () => (
@@ -104,9 +117,11 @@ export default function MycelXWaitlist() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [scrollProgress, setScrollProgress] = useState(0);
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [alerts, setAlerts] = useState<any[]>([]);
 
   useEffect(() => {
     getWaitingList().then(list => setCount(847 + (list?.length || 0)));
+    getAlerts().then(setAlerts);
     
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -260,7 +275,7 @@ export default function MycelXWaitlist() {
         /* FAQ Stacking Reveal */
         .faq-stack {
           position: relative;
-          height: 500px;
+          min-height: 400px;
           max-width: 800px;
           margin: 0 auto;
         }
@@ -268,17 +283,25 @@ export default function MycelXWaitlist() {
         .faq-item {
           position: absolute;
           width: 100%;
-          transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
           cursor: pointer;
         }
 
         .faq-item:nth-child(1) { top: 0; z-index: 3; }
-        .faq-item:nth-child(2) { top: 40px; z-index: 2; transform: scale(0.98); opacity: 0.9; }
-        .faq-item:nth-child(3) { top: 80px; z-index: 1; transform: scale(0.96); opacity: 0.8; }
+        .faq-item:nth-child(2) { top: 60px; z-index: 2; transform: scale(0.98); opacity: 0.9; }
+        .faq-item:nth-child(3) { top: 120px; z-index: 1; transform: scale(0.96); opacity: 0.8; }
 
-        .faq-stack:hover .faq-item:nth-child(1) { transform: translateY(-20px); }
+        .faq-stack:hover .faq-item:nth-child(1) { transform: translateY(-40px); }
         .faq-stack:hover .faq-item:nth-child(2) { transform: translateY(140px) scale(1); opacity: 1; }
-        .faq-stack:hover .faq-item:nth-child(3) { transform: translateY(300px) scale(1); opacity: 1; }
+        .faq-stack:hover .faq-item:nth-child(3) { transform: translateY(320px) scale(1); opacity: 1; }
+
+        @keyframes successPop {
+          0% { transform: scale(0.8); opacity: 0; }
+          50% { transform: scale(1.1); opacity: 1; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+
+        .success-anim { animation: successPop 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
         @media (max-width: 1024px) {
            .grid-3 { grid-template-columns: 1fr 1fr !important; }
@@ -290,7 +313,7 @@ export default function MycelXWaitlist() {
           .hide-mobile { display: none !important; }
           .reveal-mobile { display: block !important; }
           .grid-3, .grid-2 { grid-template-columns: 1fr !important; }
-          .faq-stack { height: auto; display: flex; flexDirection: column; gap: 20px; }
+          .faq-stack { height: auto; min-height: 0; display: flex; flex-direction: column; gap: 20px; }
           .faq-item { position: relative; top: 0 !important; transform: none !important; opacity: 1 !important; }
         }
       `}</style>
@@ -306,7 +329,7 @@ export default function MycelXWaitlist() {
       }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div className="dsp" style={{ fontWeight: 800, fontSize: 22, letterSpacing: "-.04em", display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 900 }}>M</div>
+            <img src="/assets/IMG-20260610-WA0065.jpg" style={{ width: 36, height: 36, borderRadius: 10, objectFit: "cover" }} />
             <span style={{ color: fg }}>MycelX</span>
           </div>
           
@@ -347,6 +370,17 @@ export default function MycelXWaitlist() {
           </div>
         )}
       </nav>
+
+      {/* ─── ALERTS SYSTEM ─── */}
+      {alerts.length > 0 && (
+        <div style={{ position: "fixed", top: 80, left: "50%", transform: "translateX(-50%)", zIndex: 999, width: "100%", maxWidth: 600, padding: "0 24px" }}>
+           <div style={{ background: orange, color: "#fff", padding: "12px 24px", borderRadius: 100, display: "flex", alignItems: "center", gap: 12, boxShadow: `0 10px 30px ${orange}44` }}>
+              <Bell size={18} fill="#fff" />
+              <p style={{ fontSize: 13, fontWeight: 800, flex: 1, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>{alerts[0].content}</p>
+              <button onClick={() => setAlerts([])} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: "50%", width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><X size={14} /></button>
+           </div>
+        </div>
+      )}
 
       {/* ─── HERO SECTION ─── */}
       <section style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", paddingTop: 100 }}>
@@ -392,10 +426,6 @@ export default function MycelXWaitlist() {
                   } as any}
                 />
               ))}
-              <g opacity="0.1">
-                <path d="M500,100 L500,900 M100,500 L900,500" stroke={fg} strokeWidth="0.5" />
-                <circle cx="500" cy="500" r="400" stroke={fg} strokeWidth="0.5" fill="none" />
-              </g>
             </svg>
           </div>
         </div>
@@ -417,7 +447,7 @@ export default function MycelXWaitlist() {
           <div className="reveal active" style={{ maxWidth: 500, margin: "0 auto" }}>
             {!submitted ? (
               <div style={{ position: "relative" }}>
-                 <div style={{ display: "flex", background: dark ? "#0a0a0a" : "#fff", border: `1px solid ${border}`, borderRadius: 24, padding: "8px", boxShadow: dark ? "0 20px 60px rgba(0,0,0,0.5)" : "0 20px 60px rgba(0,0,0,0.05)", flexDirection: "row", gap: 0 }}>
+                 <div style={{ display: "flex", background: dark ? "#0a0a0a" : "#fff", border: `1px solid ${border}`, borderRadius: 24, padding: "8px", boxShadow: dark ? "0 20px 60px rgba(0,0,0,0.5)" : "0 20px 60px rgba(0,0,0,0.05)" }}>
                     <input 
                       type="email" placeholder="Connect email..." value={email}
                       onChange={e => setEmail(e.target.value)}
@@ -434,8 +464,10 @@ export default function MycelXWaitlist() {
                  </p>
               </div>
             ) : (
-              <div style={{ display: "flex", alignItems: "center", gap: 20, padding: "28px", border: `1px solid ${orange}33`, borderRadius: 28, background: `${orange}08`, textAlign: "left" }}>
-                <div style={{ width: 56, height: 56, borderRadius: "50%", background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, flexShrink: 0 }}>✓</div>
+              <div className="success-anim" style={{ display: "flex", alignItems: "center", gap: 20, padding: "28px", border: `1px solid ${orange}33`, borderRadius: 28, background: `${orange}08`, textAlign: "left" }}>
+                <div style={{ width: 56, height: 56, borderRadius: "50%", background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, flexShrink: 0, boxShadow: `0 10px 20px ${orange}44` }}>
+                   <CheckCircle2 size={32} />
+                </div>
                 <div>
                   <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4, color: fg }}>Access Logged.</h3>
                   <p style={{ color: muted, fontSize: 15, fontWeight: 500 }}>The network will notify you upon activation.</p>
@@ -450,17 +482,36 @@ export default function MycelXWaitlist() {
         </div>
       </section>
 
+      {/* ─── TECH STACK SECTION ─── */}
+      <section className="sp reveal" style={{ padding: "120px 40px", borderTop: `1px solid ${border}` }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+           <div style={{ textAlign: "center", marginBottom: 80 }}>
+              <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 20 }}>Architecture</p>
+              <h2 className="dsp" style={{ fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 800, color: fg }}>Core Protocol Stack</h2>
+           </div>
+           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 24 }}>
+              {TECH_STACK.map((tech) => (
+                <div key={tech.name} className="card-feature" style={{ padding: "32px", borderRadius: 24, textAlign: "center" }}>
+                   <div style={{ color: orange, marginBottom: 16, display: "flex", justifyContent: "center" }}>{tech.icon}</div>
+                   <h4 className="dsp" style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{tech.name}</h4>
+                   <p style={{ color: muted, fontSize: 14, fontWeight: 500 }}>{tech.desc}</p>
+                </div>
+              ))}
+           </div>
+        </div>
+      </section>
+
       {/* ─── FEATURES SECTION ─── */}
       <section id="features" className="sp" style={{ padding: "160px 40px", position: "relative" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <div className="reveal" style={{ textAlign: "center", marginBottom: 120 }}>
-            <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 24 }}>System Capabilities</p>
+            <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 24 }}>Capabilities</p>
             <h2 className="dsp" style={{ fontSize: "clamp(32px, 6vw, 56px)", fontWeight: 800, lineHeight: 1.1, color: fg }}>Living Infrastructure.</h2>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 32 }} className="stagger-container reveal grid-3">
             {FEATURES.map((f, i) => (
-              <div key={i} className="card-feature" style={{ padding: 48, borderRadius: 48, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", gap: 32 }}>
+              <div key={i} className="card-feature" style={{ padding: 60, borderRadius: 56, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", gap: 32 }}>
                 <div style={{ height: 140, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
                    <svg width="100%" height="100%" viewBox="0 0 200 200">
                       {i === 0 && (
@@ -501,12 +552,12 @@ export default function MycelXWaitlist() {
              <div>
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "8px 16px", background: `${orange}11`, border: `1px solid ${orange}33`, borderRadius: 100, marginBottom: 24 }}>
                    <Trophy size={16} color={orange} />
-                   <span style={{ fontSize: 12, fontWeight: 800, color: orange, textTransform: "uppercase" }}>Rewards Protocol</span>
+                   <span style={{ fontSize: 12, fontWeight: 800, color: orange, textTransform: "uppercase" }}>Freelance Rewards</span>
                 </div>
-                <h2 className="dsp" style={{ fontSize: "clamp(32px, 5vw, 48px)", fontWeight: 800, lineHeight: 1.1, marginBottom: 24, color: fg }}>Complete Quests.<br />Earn $MYC.</h2>
-                <p style={{ color: muted, fontSize: 18, lineHeight: 1.7, fontWeight: 500, marginBottom: 32 }}>Accelerate the network. Your technical contributions are rewarded with native protocol assets before the mainnet launch.</p>
+                <h2 className="dsp" style={{ fontSize: "clamp(32px, 5vw, 48px)", fontWeight: 800, lineHeight: 1.1, marginBottom: 24, color: fg }}>Build MycelX.<br />Earn Tokens.</h2>
+                <p style={{ color: muted, fontSize: 18, lineHeight: 1.7, fontWeight: 500, marginBottom: 32 }}>We're looking for high-IQ builders to scale the protocol. Complete technical tasks and receive direct token allocations.</p>
                 <button className="btn-premium" style={{ padding: "16px 32px" }}>
-                   Access Quest Terminal <Terminal size={18} />
+                   Quest Terminal <Terminal size={18} />
                 </button>
              </div>
 
@@ -555,37 +606,12 @@ export default function MycelXWaitlist() {
         </div>
       </section>
 
-      {/* ─── TOKEN SECTION ─── */}
-      <section className="reveal" style={{ padding: "160px 40px", textAlign: "center", overflow: "hidden" }}>
-        <div style={{ maxWidth: 1000, margin: "0 auto", position: "relative" }}>
-           <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: 600, height: 600, background: orange, borderRadius: "50%", filter: "blur(200px)", opacity: 0.12, zIndex: 0 }} />
-           <div style={{ position: "relative", zIndex: 1 }}>
-              <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 32 }}>Economic Asset</p>
-              <h2 className="dsp" style={{ fontSize: "clamp(80px, 18vw, 220px)", fontWeight: 900, lineHeight: 0.8, letterSpacing: "-.08em", marginBottom: 48, color: fg }}>$MYC</h2>
-              <p style={{ color: muted, fontSize: 22, lineHeight: 1.7, maxWidth: 660, margin: "0 auto 80px", fontWeight: 500 }}>The fuel for the Mycelium economy. Required for node hosting, advanced identity layers, and governance.</p>
-              <div style={{ display: "flex", justifyContent: "center", gap: 80, flexWrap: "wrap" }}>
-                 {[
-                   { label: "Earn", icon: <TrendingUpIcon size={28} />, desc: "Growth Nodes" },
-                   { label: "Stake", icon: <Lock size={28} />, desc: "Weight Control" },
-                   { label: "Utilize", icon: <Zap size={28} />, desc: "Access Keys" }
-                 ].map((box, i) => (
-                   <div key={i} style={{ textAlign: "center" }}>
-                      <div className="card-feature" style={{ width: 72, height: 72, borderRadius: 24, color: orange, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>{box.icon}</div>
-                      <h4 className="dsp" style={{ fontSize: 24, fontWeight: 800, marginBottom: 8, color: fg }}>{box.label}</h4>
-                      <p style={{ fontSize: 14, color: muted, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>{box.desc}</p>
-                   </div>
-                 ))}
-              </div>
-           </div>
-        </div>
-      </section>
-
       {/* ─── TEAM SECTION ─── */}
       <section className="sp reveal" style={{ padding: "140px 40px" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 80 }}>
-            <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 24 }}>Founders</p>
-            <h2 className="dsp" style={{ fontWeight: 800, fontSize: "clamp(32px, 6vw, 56px)", letterSpacing: "-.04em", lineHeight: 1.1, color: fg }}>The Architects.</h2>
+            <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 24 }}>Architects</p>
+            <h2 className="dsp" style={{ fontWeight: 800, fontSize: "clamp(32px, 6vw, 56px)", letterSpacing: "-.04em", lineHeight: 1.1, color: fg }}>Verified Builders.</h2>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: 32 }} className="stagger-container reveal grid-2">
@@ -602,7 +628,7 @@ export default function MycelXWaitlist() {
                       <span style={{ color: muted, fontSize: 15 }}>@{dev.handle} · 2h</span>
                     </div>
                     <p style={{ fontSize: 15, lineHeight: 1.5, marginBottom: 16, fontWeight: 500 }}>
-                      Scaling the community layer with {dev.skills.join(", ")}. The MycelX protocol is reaching deep parity.
+                      Scaling the community layer with {dev.skills.join(", ")}. MycelX is the future of text-first sovereignty.
                     </p>
                     <div style={{ background: dark ? "#0a0a0a" : "#fafafa", border: `1px solid ${border}`, borderRadius: 16, padding: 16, marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -611,7 +637,7 @@ export default function MycelXWaitlist() {
                           ))}
                        </div>
                        <div style={{ textAlign: "right" }}>
-                          <p style={{ fontSize: 10, fontWeight: 800, color: muted, textTransform: "uppercase" }}>GitHub Streak</p>
+                          <p style={{ fontSize: 10, fontWeight: 800, color: muted, textTransform: "uppercase" }}>Commit Streak</p>
                           <p style={{ fontSize: 14, fontWeight: 900, color: fg }}>{dev.streak}</p>
                        </div>
                     </div>
@@ -640,7 +666,7 @@ export default function MycelXWaitlist() {
                 { q: "How is it anonymous?", a: "Users utilize cryptographic keys and fractional identities. You control how much metadata you reveal to any specific community node." },
                 { q: "What is Substrate?", a: "A modular blockchain framework that allows us to build a high-performance, custom-tailored chain specifically for text-first data." }
               ].map((item, i) => (
-                <div key={i} className="faq-item card-feature" style={{ padding: 40, borderRadius: 32, height: "200px" }}>
+                <div key={i} className="faq-item card-feature" style={{ padding: 40, borderRadius: 32, minHeight: "200px" }}>
                    <h4 className="dsp" style={{ fontSize: 20, fontWeight: 800, marginBottom: 16, display: "flex", alignItems: "center", gap: 16, color: fg }}>
                       <Target size={20} color={orange} /> {item.q}
                    </h4>
@@ -673,7 +699,7 @@ export default function MycelXWaitlist() {
            </div>
            <div>
               <h5 style={{ fontSize: 14, fontWeight: 800, color: fg, textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 32 }}>Connect</h5>
-              <div style={{ display: "flex", gap: 24 }}>
+              <div style={{ display: "flex", gap: 20 }}>
                  <a href="#" style={{ width: 52, height: 52, borderRadius: 16, background: surface, border: `1px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "center", color: muted, transition: "all 0.3s" }} className="card-feature"><TwitterIcon size={24} /></a>
                  <a href="#" style={{ width: 52, height: 52, borderRadius: 16, background: surface, border: `1px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "center", color: muted, transition: "all 0.3s" }} className="card-feature"><GithubIcon size={24} /></a>
               </div>

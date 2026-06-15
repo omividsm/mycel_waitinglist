@@ -23,7 +23,8 @@ import {
   Zap,
   Globe,
   Database,
-  Cpu
+  Cpu,
+  ArrowRight
 } from "lucide-react";
 import { 
   XAxis, 
@@ -34,6 +35,11 @@ import {
   AreaChart,
   Area
 } from 'recharts';
+
+const DEVELOPERS = [
+  { name: "Pope", handle: "omividsm", streak: "342 Days", skills: "Rust, Substrate, TypeScript", img: "https://github.com/omividsm.png" },
+  { name: "Sanskar Jain", handle: "sanskarjain09", streak: "218 Days", skills: "Go, Next.js, Solidity", img: "https://github.com/sanskarjain09.png" }
+];
 
 export default function AdminDashboard() {
   const [dark, setDark] = useState(true);
@@ -48,6 +54,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [carouselIndex, setCarouselIndex] = useState(0);
 
   const ADMIN_EMAIL = "omenaid44420@gmail.com";
   const ADMIN_PASSWORD = "12345";
@@ -76,6 +83,13 @@ export default function AdminDashboard() {
         setAlerts(alertsData);
         setLoading(false);
       });
+    }
+    
+    if (!isLoggedIn) {
+      const interval = setInterval(() => {
+        setCarouselIndex(prev => (prev + 1) % DEVELOPERS.length);
+      }, 5000);
+      return () => clearInterval(interval);
     }
   }, [isLoggedIn]);
 
@@ -109,46 +123,84 @@ export default function AdminDashboard() {
   if (!isLoggedIn) {
     return (
       <div style={{ minHeight: "100vh", background: "#000", display: "flex", fontFamily: "var(--font-inter)" }}>
+        <style jsx>{`
+          @media (max-width: 1024px) {
+            .visual-side { display: none !important; }
+          }
+        `}</style>
+
         {/* Left Side: Login Form */}
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 40 }}>
-          <div style={{ width: "100%", maxWidth: 400 }}>
-             <div style={{ marginBottom: 40 }}>
-                <div style={{ width: 48, height: 48, background: orange, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900, marginBottom: 24, boxShadow: `0 0 30px ${orange}33` }}>M</div>
-                <h1 style={{ color: "#fff", fontSize: 32, fontWeight: 800, letterSpacing: "-.04em" }}>Nexus Gateway</h1>
-                <p style={{ color: "#a1a1aa", fontSize: 16, marginTop: 8 }}>Authentication required for protocol administration.</p>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px" }}>
+          <div style={{ width: "100%", maxWidth: 360 }}>
+             <div style={{ marginBottom: 60 }}>
+                <div style={{ width: 44, height: 44, background: orange, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900, marginBottom: 24 }}>M</div>
+                <h1 style={{ color: "#fff", fontSize: 28, fontWeight: 800, letterSpacing: "-.04em" }}>Protocol Access</h1>
+                <p style={{ color: "#737373", fontSize: 15, marginTop: 10 }}>Provide credentials to enter the Nexus.</p>
              </div>
-             <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                <div>
-                   <label style={{ color: "#737373", fontSize: 12, fontWeight: 700, textTransform: "uppercase", marginBottom: 8, display: "block" }}>Security Identity</label>
+             <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+                <div style={{ position: "relative" }}>
                    <input 
                      type="email" value={email} onChange={e => setEmail(e.target.value)}
-                     placeholder="admin@mycelx.com" required
-                     style={{ width: "100%", background: "#0a0a0a", border: "1px solid #1c1c1f", padding: "16px 20px", borderRadius: 14, color: "#fff", fontSize: 15 }}
+                     placeholder="Entity Address" required
+                     style={{ 
+                       width: "100%", background: "transparent", border: "none", 
+                       borderBottom: `1px solid #222`, padding: "12px 0", 
+                       color: "#fff", fontSize: 15, caretColor: orange
+                     }}
                    />
                 </div>
-                <div>
-                   <label style={{ color: "#737373", fontSize: 12, fontWeight: 700, textTransform: "uppercase", marginBottom: 8, display: "block" }}>Access Key</label>
+                <div style={{ position: "relative" }}>
                    <input 
                      type="password" value={password} onChange={e => setPassword(e.target.value)}
-                     placeholder="••••••••" required
-                     style={{ width: "100%", background: "#0a0a0a", border: "1px solid #1c1c1f", padding: "16px 20px", borderRadius: 14, color: "#fff", fontSize: 15 }}
+                     placeholder="Access Key" required
+                     style={{ 
+                       width: "100%", background: "transparent", border: "none", 
+                       borderBottom: `1px solid #222`, padding: "12px 0", 
+                       color: "#fff", fontSize: 15, caretColor: orange
+                     }}
                    />
                 </div>
-                {error && <p style={{ color: orange, fontSize: 13, background: `${orange}11`, padding: 12, borderRadius: 10, textAlign: "center" }}>{error}</p>}
-                <button style={{ width: "100%", background: "#fff", color: "#000", border: "none", padding: "16px", borderRadius: 14, fontWeight: 800, cursor: "pointer", marginTop: 8, fontSize: 16, transition: "transform 0.2s" }}>Unlock Dashboard</button>
+                {error && <p style={{ color: orange, fontSize: 13, textAlign: "center" }}>{error}</p>}
+                <button style={{ width: "100%", background: "#fff", color: "#000", border: "none", padding: "14px", borderRadius: 100, fontWeight: 800, cursor: "pointer", marginTop: 16, fontSize: 15 }}>Unlock Terminal</button>
              </form>
           </div>
         </div>
         
-        {/* Right Side: Visual Design */}
-        <div style={{ flex: 1.2, background: "#050505", borderLeft: "1px solid #1c1c1f", position: "relative", overflow: "hidden", display: window?.innerWidth < 1024 ? "none" : "flex", alignItems: "center", justifyContent: "center" }}>
-           <div style={{ position: "absolute", inset: 0, opacity: 0.1, backgroundImage: `radial-gradient(circle at 2px 2px, ${orange} 1px, transparent 0)`, backgroundSize: "40px 40px" }} />
-           <div style={{ position: "relative", zIndex: 1, textAlign: "center", maxWidth: 400 }}>
-              <div style={{ width: 120, height: 120, borderRadius: 32, background: `${orange}11`, border: `1px solid ${orange}33`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 32px", color: orange }}>
-                 <ShieldCheck size={64} />
+        {/* Right Side: Carousel */}
+        <div className="visual-side" style={{ flex: 1.5, background: "#050505", borderLeft: "1px solid #111", position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", padding: 80 }}>
+           <div style={{ position: "absolute", inset: 0, opacity: 0.05, backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`, backgroundSize: "40px 40px" }} />
+           
+           <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 440 }}>
+              <div style={{ transition: "all 0.5s ease", transform: "translateY(0)" }}>
+                 <div style={{ background: "#0a0a0a", border: "1px solid #1c1c1f", borderRadius: 32, padding: 48, boxShadow: "0 40px 100px rgba(0,0,0,0.5)" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 32 }}>
+                       <img 
+                         src={DEVELOPERS[carouselIndex].img} 
+                         style={{ width: 80, height: 80, borderRadius: 24, objectFit: "cover", background: "#111" }} 
+                       />
+                       <div>
+                          <h3 style={{ color: "#fff", fontSize: 24, fontWeight: 800 }}>{DEVELOPERS[carouselIndex].name}</h3>
+                          <p style={{ color: orange, fontWeight: 700, fontSize: 14 }}>@{DEVELOPERS[carouselIndex].handle}</p>
+                       </div>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                       <div style={{ padding: "12px 20px", background: "#111", borderRadius: 16 }}>
+                          <p style={{ color: "#555", fontSize: 11, fontWeight: 800, textTransform: "uppercase", marginBottom: 4 }}>Commit Streak</p>
+                          <p style={{ color: "#fff", fontSize: 18, fontWeight: 800 }}>{DEVELOPERS[carouselIndex].streak}</p>
+                       </div>
+                       <div style={{ padding: "12px 20px", background: "#111", borderRadius: 16 }}>
+                          <p style={{ color: "#555", fontSize: 11, fontWeight: 800, textTransform: "uppercase", marginBottom: 4 }}>Core Stack</p>
+                          <p style={{ color: "#fff", fontSize: 16, fontWeight: 700 }}>{DEVELOPERS[carouselIndex].skills}</p>
+                       </div>
+                    </div>
+                 </div>
               </div>
-              <h2 style={{ fontSize: 24, fontWeight: 800, color: "#fff", marginBottom: 16 }}>Protocol Shield Active</h2>
-              <p style={{ color: "#737373", lineHeight: 1.6 }}>The MycelX administrative layer is secured with dual-factor encryption and real-time node monitoring.</p>
+              
+              <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 40 }}>
+                 {DEVELOPERS.map((_, i) => (
+                   <div key={i} style={{ width: i === carouselIndex ? 24 : 8, height: 8, borderRadius: 10, background: i === carouselIndex ? orange : "#222", transition: "all 0.3s" }} />
+                 ))}
+              </div>
            </div>
         </div>
       </div>
@@ -161,6 +213,7 @@ export default function AdminDashboard() {
         @media (max-width: 1024px) {
            .sidebar { position: fixed !important; left: -280px; z-index: 1000; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
            .sidebar.open { left: 0 !important; box-shadow: 0 0 100px rgba(0,0,0,0.5); }
+           .mobile-toggle { display: block !important; }
         }
       `}</style>
 
@@ -175,7 +228,7 @@ export default function AdminDashboard() {
                  <div style={{ width: 32, height: 32, background: orange, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900 }}>M</div>
                  <span style={{ fontWeight: 800, fontSize: 18, letterSpacing: "-.02em" }}>Nexus Core</span>
               </div>
-              <button onClick={() => setSidebarOpen(false)} style={{ display: window?.innerWidth < 1024 ? 'block' : 'none', background: 'transparent', border: 'none', color: fg }}><X size={20}/></button>
+              <button onClick={() => setSidebarOpen(false)} className="mobile-toggle" style={{ display: 'none', background: 'transparent', border: 'none', color: fg }}><X size={20}/></button>
            </div>
 
            <nav style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -185,7 +238,7 @@ export default function AdminDashboard() {
                 { name: "Alerts", icon: <Bell size={18} /> },
                 { name: "Settings", icon: <Settings size={18} /> }
               ].map((item) => (
-                <button key={item.name} onClick={() => setActiveTab(item.name)} style={{ 
+                <button key={item.name} onClick={() => { setActiveTab(item.name); setSidebarOpen(false); }} style={{ 
                   display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 12,
                   background: activeTab === item.name ? (dark ? "#1c1c1f" : "#f1f5f9") : "transparent",
                   color: activeTab === item.name ? fg : muted, cursor: "pointer", fontWeight: 700, fontSize: 14,
@@ -217,21 +270,20 @@ export default function AdminDashboard() {
 
         {/* Main Content */}
         <main style={{ flex: 1, padding: "clamp(24px, 5vw, 40px)", overflowY: "auto", height: "100vh" }}>
-           {/* Top Bar */}
            <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 48, flexWrap: "wrap", gap: 24 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                 <button onClick={() => setSidebarOpen(true)} style={{ display: window?.innerWidth < 1024 ? 'block' : 'none', background: surface, border: `1px solid ${border}`, padding: 10, borderRadius: 10, color: fg }}><Menu size={20}/></button>
+                 <button onClick={() => setSidebarOpen(true)} className="mobile-toggle" style={{ display: 'none', background: surface, border: `1px solid ${border}`, padding: 10, borderRadius: 10, color: fg }}><Menu size={20}/></button>
                  <div>
                     <h2 style={{ fontSize: "clamp(24px, 4vw, 32px)", fontWeight: 800, letterSpacing: "-.03em" }}>{activeTab}</h2>
                     <p style={{ color: muted, fontSize: 15, fontWeight: 500 }}>System Management Terminal</p>
                  </div>
               </div>
-              <div style={{ display: "flex", gap: 16, width: window?.innerWidth < 640 ? "100%" : "auto" }}>
+              <div style={{ display: "flex", gap: 16, width: "100%", maxWidth: 320 }}>
                  <div style={{ position: "relative", width: "100%" }}>
                     <Search size={18} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: muted }} />
                     <input 
-                      type="text" placeholder="Search entity database..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                      style={{ background: surface, border: `1px solid ${border}`, padding: "12px 16px 12px 44px", borderRadius: 12, width: 320, color: fg, fontSize: 14, fontWeight: 500 }} 
+                      type="text" placeholder="Search database..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                      style={{ background: surface, border: `1px solid ${border}`, padding: "12px 16px 12px 44px", borderRadius: 12, width: "100%", color: fg, fontSize: 14, fontWeight: 500 }} 
                     />
                  </div>
               </div>
@@ -246,18 +298,18 @@ export default function AdminDashboard() {
                      { label: "Uptime", value: "99.99%", icon: <Activity size={20} /> },
                      { label: "Encrypted", value: "AES-256", icon: <ShieldCheck size={20} /> }
                    ].map((stat, i) => (
-                     <div key={i} style={{ background: surface, border: `1px solid ${border}`, borderRadius: 20, padding: 28, boxShadow: "0 4px 20px rgba(0,0,0,0.02)" }}>
+                     <div key={i} style={{ background: surface, border: `1px solid ${border}`, borderRadius: 20, padding: 28 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                            <span style={{ color: muted, fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em" }}>{stat.label}</span>
-                           <div style={{ color: orange, background: `${orange}11`, padding: 8, borderRadius: 10 }}>{stat.icon}</div>
+                           <div style={{ color: orange }}>{stat.icon}</div>
                         </div>
                         <h3 style={{ fontSize: 32, fontWeight: 900 }}>{stat.value}</h3>
                      </div>
                    ))}
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: window?.innerWidth < 1200 ? "1fr" : "2fr 1fr", gap: 24 }}>
-                   <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 24, padding: 32 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: 24 }}>
+                   <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 24, padding: "clamp(20px, 4vw, 32px)" }}>
                       <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 32 }}>Signup Velocity</h3>
                       <div style={{ height: 350, width: "100%" }}>
                          <ResponsiveContainer width="100%" height="100%">
@@ -289,7 +341,7 @@ export default function AdminDashboard() {
                          ].map(sys => (
                            <div key={sys.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                               <span style={{ fontWeight: 600, fontSize: 14 }}>{sys.name}</span>
-                              <span style={{ fontSize: 12, fontWeight: 800, color: sys.color, background: `${sys.color}11`, padding: "4px 12px", borderRadius: 100 }}>{sys.status}</span>
+                              <span style={{ fontSize: 11, fontWeight: 900, color: sys.color, background: `${sys.color}11`, padding: "4px 12px", borderRadius: 100 }}>{sys.status}</span>
                            </div>
                          ))}
                       </div>
@@ -327,20 +379,20 @@ export default function AdminDashboard() {
 
            {activeTab === "Alerts" && (
              <div className="reveal active" style={{ maxWidth: 700 }}>
-                <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 24, padding: 40, marginBottom: 32 }}>
-                   <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 8 }}>Push Protocol Update</h3>
-                   <p style={{ color: muted, marginBottom: 32 }}>Updates reflect instantly on the MycelX home network.</p>
+                <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 24, padding: "clamp(20px, 4vw, 40px)", marginBottom: 32 }}>
+                   <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 8 }}>Broadcast Update</h3>
+                   <p style={{ color: muted, marginBottom: 32 }}>Broadcast updates to the global MycelX home terminal.</p>
                    <textarea 
                      value={newAlert} onChange={e => setNewAlert(e.target.value)}
-                     placeholder="State the update content..." 
-                     style={{ width: "100%", height: 120, background: "#0a0a0a", border: `1px solid ${border}`, borderRadius: 16, padding: 20, color: "#fff", fontSize: 15, marginBottom: 20, resize: "none" }}
+                     placeholder="State the protocol update..." 
+                     style={{ width: "100%", height: 120, background: "#0a0a0a", border: `1px solid ${border}`, borderRadius: 16, padding: 20, color: "#fff", fontSize: 15, marginBottom: 20, resize: "none", caretColor: orange }}
                    />
                    <button onClick={handlePushAlert} style={{ display: "flex", alignItems: "center", gap: 10, background: orange, color: "#fff", border: "none", padding: "14px 28px", borderRadius: 14, fontWeight: 800, cursor: "pointer", fontSize: 15 }}>
-                      Broadcast Update <Send size={18} />
+                      Broadcast <Send size={18} />
                    </button>
                 </div>
 
-                <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 24 }}>History Ledger</h3>
+                <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 24 }}>System History</h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                    {alerts.map((alert) => (
                      <div key={alert.id} style={{ background: surface, border: `1px solid ${border}`, borderRadius: 20, padding: 24 }}>
