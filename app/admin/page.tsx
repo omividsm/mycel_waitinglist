@@ -134,7 +134,11 @@ export default function AdminDashboard() {
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px" }}>
           <div style={{ width: "100%", maxWidth: 360 }}>
              <div style={{ marginBottom: 60 }}>
-                <div style={{ width: 44, height: 44, background: orange, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900, marginBottom: 24 }}>M</div>
+                <img 
+                  src="/assets/ChatGPT Image Jun 11, 2026, 01_36_29 PM.png" 
+                  alt="MycelX Logo" 
+                  style={{ width: 44, height: 44, borderRadius: 10, marginBottom: 24, objectFit: "cover" }} 
+                />
                 <h1 style={{ color: "#fff", fontSize: 28, fontWeight: 800, letterSpacing: "-.04em" }}>Protocol Access</h1>
                 <p style={{ color: "#737373", fontSize: 15, marginTop: 10 }}>Provide credentials to enter the Nexus.</p>
              </div>
@@ -226,7 +230,11 @@ export default function AdminDashboard() {
         }}>
            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                 <div style={{ width: 32, height: 32, background: orange, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900 }}>M</div>
+                 <img 
+                   src="/assets/ChatGPT Image Jun 11, 2026, 01_36_29 PM.png" 
+                   alt="MycelX Logo" 
+                   style={{ width: 32, height: 32, borderRadius: 8, objectFit: "cover" }} 
+                 />
                  <span style={{ fontWeight: 800, fontSize: 18, letterSpacing: "-.02em" }}>Nexus Core</span>
               </div>
               <button onClick={() => setSidebarOpen(false)} className="mobile-toggle" style={{ display: 'none', background: 'transparent', border: 'none', color: fg }}><X size={20}/></button>

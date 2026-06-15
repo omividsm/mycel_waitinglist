@@ -244,7 +244,11 @@ export default function MycelXWaitlist() {
       <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, transition: "all 0.4s", padding: scrolled ? "12px 0" : "24px 0", background: scrolled ? (dark ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.8)") : "transparent", backdropFilter: scrolled ? "blur(20px)" : "none", borderBottom: scrolled ? `1px solid ${border}` : "1px solid transparent" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div className="dsp" style={{ fontWeight: 800, fontSize: 22, letterSpacing: "-.04em", display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 900 }}>M</div>
+            <img 
+              src="/assets/ChatGPT Image Jun 11, 2026, 01_36_29 PM.png" 
+              alt="MycelX Logo" 
+              style={{ width: 36, height: 36, borderRadius: 10, objectFit: "cover" }} 
+            />
             <span style={{ color: fg }}>MycelX</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
@@ -439,7 +443,7 @@ export default function MycelXWaitlist() {
       {/* ─── EARN SECTION (TASKS) ─── */}
       <section id="tasks" className="sp reveal" style={{ padding: "clamp(60px, 10vw, 140px) 20px", borderTop: `1px solid ${border}` }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 64, alignItems: "center" }} className="grid-stack">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "clamp(32px, 5vw, 64px)", alignItems: "center" }} className="grid-stack">
              <div>
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "8px 16px", background: `${orange}11`, border: `1px solid ${orange}33`, borderRadius: 100, marginBottom: 24 }}>
                    <Trophy size={16} color={orange} />
@@ -451,7 +455,7 @@ export default function MycelXWaitlist() {
              </div>
              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {TASKS.map((task) => (
-                  <div key={task.id} className="card-feature" style={{ padding: "24px 32px", borderRadius: 24, display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
+                  <div key={task.id} className="card-feature" style={{ padding: "clamp(20px, 3vw, 32px)", borderRadius: 24, display: "flex", alignItems: "center", gap: "clamp(16px, 3vw, 24px)", flexWrap: "wrap" }}>
                      <div style={{ width: 48, height: 48, borderRadius: 12, background: `${orange}11`, color: orange, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{task.icon}</div>
                      <div style={{ flex: "1 1 200px" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4, flexWrap: "wrap", gap: 8 }}>
@@ -498,7 +502,7 @@ export default function MycelXWaitlist() {
             <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 24 }}>Founders</p>
             <h2 className="dsp" style={{ fontWeight: 800, fontSize: "clamp(32px, 6vw, 56px)", letterSpacing: "-.04em", lineHeight: 1.1, color: fg }}>The Architects.</h2>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: 32 }} className="stagger-container reveal">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 32 }} className="stagger-container reveal">
             {TEAM.map((dev, i) => (
               <div key={i} className="card-feature" style={{ padding: "32px", borderRadius: 28, display: "block", color: fg, position: "relative" }}>
                 <div style={{ display: "flex", gap: 16 }}>
