@@ -325,7 +325,7 @@ export default function MycelXWaitlist() {
               <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 20 }}>Architecture</p>
               <h2 className="dsp" style={{ fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 800, color: fg }}>Protocol Foundation</h2>
            </div>
-           <div className="tech-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24 }}>
+           <div className="tech-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
               {TECH_STACK.map((tech) => (
                 <div key={tech.name} className="card-feature" style={{ padding: "40px", borderRadius: 32, textAlign: "center", position: "relative", overflow: "hidden" }}>
                    <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "4px", background: tech.accent }} />
@@ -340,89 +340,121 @@ export default function MycelXWaitlist() {
       </section>
 
       {/* ─── GLOBAL CONNECTIVITY SECTION (GLOBE) ─── */}
-      <section id="global" className="sp reveal" style={{ padding: "160px 40px", background: dark ? "#050505" : "#fafafa", borderTop: `1px solid ${border}` }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-           <div style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: 80, alignItems: "center" }} className="grid-stack">
-              <div>
+      <section id="global" className="sp reveal" style={{ padding: "clamp(80px, 12vw, 160px) 20px", background: dark ? "#050505" : "#fafafa", borderTop: `1px solid ${border}` }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
+           <div style={{ display: "flex", flexDirection: "column", gap: 60 }}>
+              <div style={{ textAlign: "center", maxWidth: 800, margin: "0 auto" }}>
                  <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 20 }}>Network Coverage</p>
-                 <h2 className="dsp" style={{ fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 800, lineHeight: 1.1, marginBottom: 32, color: fg }}>Global Nexus.</h2>
-                 <p style={{ color: muted, fontSize: 18, lineHeight: 1.7, fontWeight: 500, marginBottom: 40 }}>MycelX nodes are proliferating across all continents. Our decentralized mesh ensures that intelligence has no borders.</p>
-                 
-                 {selectedRegion ? (
-                   <div className="success-anim" style={{ background: surface, border: `1px solid ${orange}33`, padding: 32, borderRadius: 28 }}>
-                      <h4 className="dsp" style={{ fontSize: 24, fontWeight: 800, color: orange, marginBottom: 8 }}>{selectedRegion.name}</h4>
-                      <div style={{ display: "flex", gap: 24 }}>
-                         <div><p style={{ fontSize: 11, fontWeight: 800, color: muted }}>TRACTION</p><p style={{ fontSize: 18, fontWeight: 900 }}>{selectedRegion.traction}</p></div>
-                         <div><p style={{ fontSize: 11, fontWeight: 800, color: muted }}>TRAFFIC</p><p style={{ fontSize: 18, fontWeight: 900, color: "#10b981" }}>{selectedRegion.traffic}</p></div>
-                      </div>
-                   </div>
-                 ) : (
-                   <div style={{ display: "flex", alignItems: "center", gap: 12, color: muted, fontWeight: 600 }}>
-                      <MousePointer2 size={20} /> Select a region on the nexus map to view metrics.
-                   </div>
-                 )}
+                 <h2 className="dsp" style={{ fontSize: "clamp(36px, 6vw, 72px)", fontWeight: 800, lineHeight: 1.1, marginBottom: 32, color: fg }}>Global Nexus.</h2>
+                 <p style={{ color: muted, fontSize: "clamp(16px, 2vw, 20px)", lineHeight: 1.7, fontWeight: 500 }}>MycelX nodes are proliferating across all continents. Our decentralized mesh ensures that intelligence has no borders.</p>
               </div>
 
-              <div style={{ position: "relative", aspectRatio: "16/9", background: dark ? "#0a0a0a" : "#eee", borderRadius: 40, border: `1px solid ${border}`, overflow: "hidden" }}>
-                 <ComposableMap
-                   projectionConfig={{
-                     scale: 140,
-                   }}
-                   style={{
-                     width: "100%",
-                     height: "100%",
-                   }}
-                 >
-                   <Geographies geography={geoUrl}>
-                     {({ geographies }) =>
-                       geographies.map((geo) => (
-                         <Geography
-                           key={geo.rsmKey}
-                           geography={geo}
-                           fill={dark ? "#1a1a1a" : "#ddd"}
-                           stroke={dark ? "#333" : "#bbb"}
-                           strokeWidth={0.5}
-                           style={{
-                             default: { outline: "none" },
-                             hover: { fill: orange, outline: "none", transition: "all 250ms" },
-                             pressed: { outline: "none" },
-                           }}
-                         />
-                       ))
-                     }
-                   </Geographies>
-                   {WORLD_REGIONS.map((region) => (
-                     <Marker key={region.name} coordinates={region.coordinates as [number, number]} onClick={() => setSelectedRegion(region)}>
-                       <circle r={4} fill={orange} stroke="#fff" strokeWidth={1} style={{ cursor: "pointer" }} />
-                       <circle r={12} fill={orange} opacity={0.3} className="ping" style={{ cursor: "pointer" }} />
-                     </Marker>
-                   ))}
-                 </ComposableMap>
-                 <div style={{ position: "absolute", bottom: 20, right: 24, fontSize: 10, fontWeight: 800, color: muted, textTransform: "uppercase" }}>Real-time Node Distribution</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 40 }} className="map-container">
+                 <div style={{ 
+                   position: "relative", 
+                   width: "100%",
+                   height: "clamp(400px, 60vh, 800px)", 
+                   background: dark ? "#0a0a0a" : "#eee", 
+                   borderRadius: "clamp(20px, 4vw, 40px)", 
+                   border: `1px solid ${border}`, 
+                   overflow: "hidden",
+                   boxShadow: "0 20px 50px rgba(0,0,0,0.1)"
+                 }}>
+                    <ComposableMap
+                      projectionConfig={{
+                        scale: 200,
+                      }}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                      }}
+                    >
+                      <Geographies geography={geoUrl}>
+                        {({ geographies }) =>
+                          geographies.map((geo) => (
+                            <Geography
+                              key={geo.rsmKey}
+                              geography={geo}
+                              fill={dark ? "#1a1a1a" : "#ddd"}
+                              stroke={dark ? "#333" : "#bbb"}
+                              strokeWidth={0.5}
+                              style={{
+                                default: { outline: "none" },
+                                hover: { fill: `${orange}44`, outline: "none", transition: "all 250ms" },
+                                pressed: { outline: "none" },
+                              }}
+                            />
+                          ))
+                        }
+                      </Geographies>
+                      {WORLD_REGIONS.map((region) => (
+                        <Marker key={region.name} coordinates={region.coordinates as [number, number]} onClick={() => setSelectedRegion(region)}>
+                          <circle r={6} fill={orange} stroke="#fff" strokeWidth={2} style={{ cursor: "pointer" }} />
+                          <circle r={18} fill={orange} opacity={0.3} className="ping" style={{ cursor: "pointer" }} />
+                          <text
+                            textAnchor="middle"
+                            y={-15}
+                            style={{ fontFamily: "var(--font-display)", fill: fg, fontSize: 10, fontWeight: 800, pointerEvents: "none", textTransform: "uppercase" }}
+                          >
+                            {region.name}
+                          </text>
+                        </Marker>
+                      ))}
+                    </ComposableMap>
+
+                    {selectedRegion && (
+                      <div className="success-anim" style={{ 
+                        position: "absolute", 
+                        top: 24, 
+                        right: 24, 
+                        background: `${surface}ee`, 
+                        backdropFilter: "blur(12px)",
+                        border: `1px solid ${orange}44`, 
+                        padding: 24, 
+                        borderRadius: 24,
+                        maxWidth: 280,
+                        zIndex: 10
+                      }}>
+                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                            <h4 className="dsp" style={{ fontSize: 20, fontWeight: 800, color: orange }}>{selectedRegion.name}</h4>
+                            <button onClick={() => setSelectedRegion(null)} style={{ background: "none", border: "none", color: muted, cursor: "pointer" }}><X size={16} /></button>
+                         </div>
+                         <div style={{ display: "flex", gap: 20 }}>
+                            <div><p style={{ fontSize: 10, fontWeight: 800, color: muted, marginBottom: 4 }}>NODES</p><p style={{ fontSize: 16, fontWeight: 900 }}>{selectedRegion.traction}</p></div>
+                            <div><p style={{ fontSize: 10, fontWeight: 800, color: muted, marginBottom: 4 }}>STATUS</p><p style={{ fontSize: 16, fontWeight: 900, color: "#10b981" }}>{selectedRegion.traffic}</p></div>
+                         </div>
+                      </div>
+                    )}
+
+                    <div style={{ position: "absolute", bottom: 24, left: 24, display: "flex", alignItems: "center", gap: 12, color: muted, fontWeight: 600, fontSize: 12, background: `${surface}aa`, padding: "8px 16px", borderRadius: 100, backdropFilter: "blur(4px)" }}>
+                       <MousePointer2 size={14} /> Select nodes to view metrics
+                    </div>
+                    <div style={{ position: "absolute", bottom: 24, right: 24, fontSize: 10, fontWeight: 800, color: muted, textTransform: "uppercase", letterSpacing: "0.1em" }}>Global Nexus Terminal v1.0</div>
+                 </div>
               </div>
            </div>
         </div>
       </section>
 
       {/* ─── EARN SECTION (TASKS) ─── */}
-      <section id="tasks" className="sp reveal" style={{ padding: "140px 40px", borderTop: `1px solid ${border}` }}>
+      <section id="tasks" className="sp reveal" style={{ padding: "clamp(60px, 10vw, 140px) 20px", borderTop: `1px solid ${border}` }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: 64, alignItems: "center" }} className="grid-stack">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 64, alignItems: "center" }} className="grid-stack">
              <div>
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "8px 16px", background: `${orange}11`, border: `1px solid ${orange}33`, borderRadius: 100, marginBottom: 24 }}>
                    <Trophy size={16} color={orange} />
                    <span style={{ fontSize: 12, fontWeight: 800, color: orange, textTransform: "uppercase" }}>Freelance Rewards</span>
                 </div>
                 <h2 className="dsp" style={{ fontSize: "clamp(32px, 5vw, 48px)", fontWeight: 800, lineHeight: 1.1, marginBottom: 24, color: fg }}>Build MycelX.<br />Earn Tokens.</h2>
-                <p style={{ color: muted, fontSize: 18, lineHeight: 1.7, fontWeight: 500, marginBottom: 32 }}>We're looking for high-IQ builders to scale the protocol. Complete technical tasks and receive direct token allocations.</p>
+                <p style={{ color: muted, fontSize: "clamp(16px, 2vw, 18px)", lineHeight: 1.7, fontWeight: 500, marginBottom: 32 }}>We're looking for high-IQ builders to scale the protocol. Complete technical tasks and receive direct token allocations.</p>
                 <button className="btn-premium" style={{ padding: "16px 32px" }}>Quest Terminal <Terminal size={18} /></button>
              </div>
              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {TASKS.map((task) => (
-                  <div key={task.id} className="card-feature" style={{ padding: "24px 32px", borderRadius: 24, display: "flex", alignItems: "center", gap: 24 }}>
+                  <div key={task.id} className="card-feature" style={{ padding: "24px 32px", borderRadius: 24, display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
                      <div style={{ width: 48, height: 48, borderRadius: 12, background: `${orange}11`, color: orange, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{task.icon}</div>
-                     <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                     <div style={{ flex: "1 1 200px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4, flexWrap: "wrap", gap: 8 }}>
                            <h4 style={{ fontWeight: 800, fontSize: 16 }}>{task.title}</h4>
                            <span style={{ fontSize: 13, fontWeight: 900, color: orange }}>{task.reward}</span>
                         </div>
@@ -436,22 +468,22 @@ export default function MycelXWaitlist() {
       </section>
 
       {/* ─── ROADMAP SECTION ─── */}
-      <section id="roadmap" className="sp reveal" style={{ padding: "120px 40px", borderTop: `1px solid ${border}`, borderBottom: `1px solid ${border}` }}>
+      <section id="roadmap" className="sp reveal" style={{ padding: "clamp(60px, 10vw, 120px) 20px", borderTop: `1px solid ${border}`, borderBottom: `1px solid ${border}` }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-           <div style={{ textAlign: "center", marginBottom: 80 }}>
+           <div style={{ textAlign: "center", marginBottom: 60 }}>
               <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 20 }}>System Lifecycle</p>
               <h2 className="dsp" style={{ fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 800, color: fg }}>Operational Roadmap</h2>
            </div>
-           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 60 }} className="stagger-container reveal">
+           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 24 }} className="reveal">
               {ROADMAP.map((item, i) => (
-                <div key={i} style={{ position: "relative" }}>
-                   <div style={{ fontSize: 84, fontWeight: 900, color: dark ? "#111" : "#eee", position: "absolute", top: -60, left: 0, zIndex: 0 }}>{item.step}</div>
-                   <div style={{ position: "relative", zIndex: 1, padding: "40px 0" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
-                         <h3 className="dsp" style={{ fontSize: 26, fontWeight: 800, color: fg }}>{item.title}</h3>
-                         <span style={{ fontSize: 11, fontWeight: 900, background: item.status === "Active" ? `${orange}22` : (dark ? "#111" : "#eee"), color: item.status === "Active" ? orange : muted, padding: "6px 14px", borderRadius: 100 }}>{item.status}</span>
+                <div key={i} className="card-feature" style={{ padding: 40, borderRadius: 32, border: `1px solid ${border}`, position: "relative", overflow: "hidden" }}>
+                   <div style={{ fontSize: 84, fontWeight: 900, color: dark ? "#111" : "#f5f5f5", position: "absolute", top: -20, right: -10, zIndex: 0, opacity: 0.5 }}>{item.step}</div>
+                   <div style={{ position: "relative", zIndex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+                         <h3 style={{ fontSize: 24, fontWeight: 800 }}>{item.title}</h3>
+                         <span style={{ fontSize: 10, fontWeight: 900, padding: "4px 12px", borderRadius: 100, background: item.status === "Active" ? `${orange}22` : (dark ? "#222" : "#eee"), color: item.status === "Active" ? orange : muted, textTransform: "uppercase" }}>{item.status}</span>
                       </div>
-                      <p style={{ color: muted, fontSize: 17, lineHeight: 1.7, fontWeight: 500 }}>{item.desc}</p>
+                      <p style={{ color: muted, fontSize: 16, lineHeight: 1.6, fontWeight: 500 }}>{item.desc}</p>
                    </div>
                 </div>
               ))}

@@ -56,7 +56,7 @@ export default function AdminDashboard() {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [isClient, setIsClient] = useState(false);
 
-  const ADMIN_EMAIL = "omenaid44420@gmail.com";
+  const ADMIN_EMAILS = ["omenaid44420@gmail.com", "sanskarjain056@gmail.com"];
   const ADMIN_PASSWORD = "12345";
   const orange = "#FF4D00";
   
@@ -68,7 +68,7 @@ export default function AdminDashboard() {
 
   function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    if (ADMIN_EMAILS.includes(email) && password === ADMIN_PASSWORD) {
       setIsLoggedIn(true);
       setError("");
     } else {
@@ -255,7 +255,7 @@ export default function AdminDashboard() {
                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <div style={{ width: 32, height: 32, borderRadius: "50%", background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 900 }}>A</div>
                     <div style={{ overflow: "hidden" }}>
-                       <p style={{ fontSize: 13, fontWeight: 800, whiteSpace: "nowrap", textOverflow: "ellipsis" }}>{ADMIN_EMAIL}</p>
+                       <p style={{ fontSize: 13, fontWeight: 800, whiteSpace: "nowrap", textOverflow: "ellipsis" }}>{ADMIN_EMAILS[0]}</p>
                        <p style={{ fontSize: 11, color: "#10b981", fontWeight: 700 }}>Root Admin</p>
                     </div>
                  </div>
