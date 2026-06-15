@@ -17,14 +17,21 @@ import {
   TrendingUp as TrendingUpIcon,
   Sun,
   Moon,
-  Github,
-  Twitter as TwitterIcon,
-  CheckCircle2,
   Trophy,
   Terminal,
   Menu,
-  X
+  X,
+  CheckCircle2
 } from "lucide-react";
+
+// Custom SVG Icons to avoid naming issues and build errors
+const GithubIcon = (props: any) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+);
+
+const TwitterIcon = (props: any) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
+);
 
 const FEATURES = [
   {
@@ -77,7 +84,7 @@ const TEAM = [
 
 const TASKS = [
   { id: 1, title: "Identity Verification", reward: "50 $MYC", icon: <Shield size={20} />, desc: "Link your GitHub and verify your developer reputation." },
-  { id: 2, title: "Node Contribution", reward: "100 $MYC", icon: <Activity size={20} />, desc: "Contribute to the text-first corpus by publishing a technical thought." },
+  { id: 2, title: "Node Contribution", reward: "100 $MYC", icon: <Zap size={20} />, desc: "Contribute to the text-first corpus by publishing a technical thought." },
   { id: 3, title: "Ecosystem Growth", reward: "25 $MYC", icon: <Users size={20} />, desc: "Invite a fellow builder to the MycelX waitlist." }
 ];
 
@@ -86,8 +93,6 @@ const VerifiedBadge = () => (
     <g><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6a3.731 3.731 0 00.148-1.04c0-2.07-1.29-3.75-2.88-3.75-.41 0-.8.11-1.15.3-.65-1.27-2.02-2.14-3.6-2.14-1.58 0-2.95.87-3.6 2.14-.35-.19-.74-.3-1.15-.3-1.59 0-2.88 1.68-2.88 3.75 0 .36.05.7.148 1.04-1.273.65-2.148 2.02-2.148 3.6 0 1.58.875 2.95 2.148 3.6a3.731 3.731 0 00-.148 1.04c0 2.07 1.29 3.75 2.88 3.75.41 0 .8-.11 1.15-.3.65 1.27 2.02 2.14 3.6 2.14 1.58 0 2.95-.87 3.6-2.14.35.19.74.3 1.15.3 1.59 0 2.88-1.68 2.88-3.75 0-.36-.05-.7-.148-1.04 1.273-.65 2.148-2.02 2.148-3.6zm-10.49 4.21L8.33 13l1.45-1.46 2.22 2.21 4.66-4.66 1.45 1.45-6.1 6.17z"></path></g>
   </svg>
 );
-
-const Activity = ({ size, ...props }: any) => <Zap size={size} {...props} />;
 
 export default function MycelXWaitlist() {
   const [dark, setDark] = useState(true);
@@ -161,7 +166,7 @@ export default function MycelXWaitlist() {
       <div style={{ 
         position: "fixed", top: 0, left: 0, height: "2px", 
         width: `${scrollProgress}%`, background: orange, 
-        zIndex: 1001, transition: "width 0.1s linear" 
+        zIndex: 1100, transition: "width 0.1s linear" 
       }} />
 
       <style jsx global>{`
@@ -255,7 +260,7 @@ export default function MycelXWaitlist() {
         /* FAQ Stacking Reveal */
         .faq-stack {
           position: relative;
-          height: 450px;
+          height: 500px;
           max-width: 800px;
           margin: 0 auto;
         }
@@ -272,27 +277,21 @@ export default function MycelXWaitlist() {
         .faq-item:nth-child(3) { top: 80px; z-index: 1; transform: scale(0.96); opacity: 0.8; }
 
         .faq-stack:hover .faq-item:nth-child(1) { transform: translateY(-20px); }
-        .faq-stack:hover .faq-item:nth-child(2) { transform: translateY(120px) scale(1); opacity: 1; }
-        .faq-stack:hover .faq-item:nth-child(3) { transform: translateY(260px) scale(1); opacity: 1; }
-
-        @keyframes moveAlong {
-          from { offset-distance: 0%; }
-          to { offset-distance: 100%; }
-        }
+        .faq-stack:hover .faq-item:nth-child(2) { transform: translateY(140px) scale(1); opacity: 1; }
+        .faq-stack:hover .faq-item:nth-child(3) { transform: translateY(300px) scale(1); opacity: 1; }
 
         @media (max-width: 1024px) {
            .grid-3 { grid-template-columns: 1fr 1fr !important; }
         }
 
         @media (max-width: 768px) {
-          .hhl { font-size: 40px !important; }
+          .hhl { font-size: 44px !important; }
           .sp { padding: 80px 20px !important; }
           .hide-mobile { display: none !important; }
+          .reveal-mobile { display: block !important; }
           .grid-3, .grid-2 { grid-template-columns: 1fr !important; }
-          .faq-stack { height: 750px; }
-          .faq-stack:hover .faq-item:nth-child(1) { transform: translateY(0); }
-          .faq-stack:hover .faq-item:nth-child(2) { transform: translateY(240px); }
-          .faq-stack:hover .faq-item:nth-child(3) { transform: translateY(480px); }
+          .faq-stack { height: auto; display: flex; flexDirection: column; gap: 20px; }
+          .faq-item { position: relative; top: 0 !important; transform: none !important; opacity: 1 !important; }
         }
       `}</style>
 
@@ -340,7 +339,7 @@ export default function MycelXWaitlist() {
 
         {/* Mobile Menu */}
         {mobileMenu && (
-          <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: bg, borderBottom: `1px solid ${border}`, padding: "24px", display: "flex", flexDirection: "column", gap: 20 }}>
+          <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: bg, borderBottom: `1px solid ${border}`, padding: "24px", display: "flex", flexDirection: "column", gap: 20, zIndex: 1000 }}>
              <a href="#features" onClick={() => setMobileMenu(false)} style={{ fontSize: 14, fontWeight: 700, color: fg, textDecoration: "none" }}>Features</a>
              <a href="#tasks" onClick={() => setMobileMenu(false)} style={{ fontSize: 14, fontWeight: 700, color: fg, textDecoration: "none" }}>Earn $MYC</a>
              <a href="#roadmap" onClick={() => setMobileMenu(false)} style={{ fontSize: 14, fontWeight: 700, color: fg, textDecoration: "none" }}>Roadmap</a>
@@ -418,7 +417,7 @@ export default function MycelXWaitlist() {
           <div className="reveal active" style={{ maxWidth: 500, margin: "0 auto" }}>
             {!submitted ? (
               <div style={{ position: "relative" }}>
-                 <div style={{ display: "flex", background: dark ? "#0a0a0a" : "#fff", border: `1px solid ${border}`, borderRadius: 24, padding: "8px", boxShadow: dark ? "0 20px 60px rgba(0,0,0,0.5)" : "0 20px 60px rgba(0,0,0,0.05)", flexDirection: window?.innerWidth < 640 ? "column" : "row", gap: window?.innerWidth < 640 ? 12 : 0 }}>
+                 <div style={{ display: "flex", background: dark ? "#0a0a0a" : "#fff", border: `1px solid ${border}`, borderRadius: 24, padding: "8px", boxShadow: dark ? "0 20px 60px rgba(0,0,0,0.5)" : "0 20px 60px rgba(0,0,0,0.05)", flexDirection: "row", gap: 0 }}>
                     <input 
                       type="email" placeholder="Connect email..." value={email}
                       onChange={e => setEmail(e.target.value)}
@@ -454,7 +453,7 @@ export default function MycelXWaitlist() {
       {/* ─── FEATURES SECTION ─── */}
       <section id="features" className="sp" style={{ padding: "160px 40px", position: "relative" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <div className="reveal" style={{ textAlign: "center", marginBottom: 100 }}>
+          <div className="reveal" style={{ textAlign: "center", marginBottom: 120 }}>
             <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 24 }}>System Capabilities</p>
             <h2 className="dsp" style={{ fontSize: "clamp(32px, 6vw, 56px)", fontWeight: 800, lineHeight: 1.1, color: fg }}>Living Infrastructure.</h2>
           </div>
@@ -641,7 +640,7 @@ export default function MycelXWaitlist() {
                 { q: "How is it anonymous?", a: "Users utilize cryptographic keys and fractional identities. You control how much metadata you reveal to any specific community node." },
                 { q: "What is Substrate?", a: "A modular blockchain framework that allows us to build a high-performance, custom-tailored chain specifically for text-first data." }
               ].map((item, i) => (
-                <div key={i} className="faq-item card-feature" style={{ padding: 40, borderRadius: 32, height: "180px" }}>
+                <div key={i} className="faq-item card-feature" style={{ padding: 40, borderRadius: 32, height: "200px" }}>
                    <h4 className="dsp" style={{ fontSize: 20, fontWeight: 800, marginBottom: 16, display: "flex", alignItems: "center", gap: 16, color: fg }}>
                       <Target size={20} color={orange} /> {item.q}
                    </h4>
@@ -667,20 +666,20 @@ export default function MycelXWaitlist() {
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                  {TEAM.map((dev, i) => (
                    <a key={i} href={dev.github} style={{ color: muted, fontSize: 15, textDecoration: "none", fontWeight: 700, display: "flex", alignItems: "center", gap: 10 }}>
-                      <Github size={18} /> {dev.name}
+                      <GithubIcon size={18} /> {dev.name}
                    </a>
                  ))}
               </div>
            </div>
            <div>
               <h5 style={{ fontSize: 14, fontWeight: 800, color: fg, textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 32 }}>Connect</h5>
-              <div style={{ display: "flex", gap: 20 }}>
-                 <a href="#" style={{ width: 52, height: 52, borderRadius: 16, background: surface, border: `1px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "center", color: muted, transition: "all 0.3s" }}><TwitterIcon size={24} /></a>
-                 <a href="#" style={{ width: 52, height: 52, borderRadius: 16, background: surface, border: `1px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "center", color: muted, transition: "all 0.3s" }}><Github size={24} /></a>
+              <div style={{ display: "flex", gap: 24 }}>
+                 <a href="#" style={{ width: 52, height: 52, borderRadius: 16, background: surface, border: `1px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "center", color: muted, transition: "all 0.3s" }} className="card-feature"><TwitterIcon size={24} /></a>
+                 <a href="#" style={{ width: 52, height: 52, borderRadius: 16, background: surface, border: `1px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "center", color: muted, transition: "all 0.3s" }} className="card-feature"><GithubIcon size={24} /></a>
               </div>
            </div>
         </div>
-        <div style={{ maxWidth: 1200, margin: "60px auto 0", paddingTop: 40, borderTop: `1px solid ${border}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexDirection: window?.innerWidth < 640 ? "column" : "row", gap: 20 }}>
+        <div style={{ maxWidth: 1200, margin: "60px auto 0", paddingTop: 40, borderTop: `1px solid ${border}`, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 20 }}>
            <p style={{ color: muted, fontSize: 12, fontWeight: 800 }}>© 2026 MYCELX PROTOCOL · ALL RIGHTS RESERVED</p>
            <p style={{ color: muted, fontSize: 12, fontWeight: 800 }}>SECURED BY SUBSTRATE · AES-256</p>
         </div>

@@ -1,29 +1,31 @@
 'use client'
 
 import { useState, useEffect, useMemo } from "react";
-import { getWaitingList } from "../actions";
+import { getWaitingList, pushAlert, getAlerts } from "../actions";
 import { 
   Users, 
   TrendingUp, 
   LogOut, 
-  BarChart3,
-  Activity,
-  Mail,
-  ShieldCheck,
-  Sun,
-  Moon,
-  LayoutDashboard,
-  Settings,
-  Bell,
-  Search,
-  ChevronRight,
-  MoreHorizontal,
-  ArrowUpRight,
-  ArrowDownRight
+  Activity, 
+  Mail, 
+  ShieldCheck, 
+  Sun, 
+  Moon, 
+  LayoutDashboard, 
+  Settings, 
+  Bell, 
+  Search, 
+  MoreHorizontal, 
+  ArrowUpRight, 
+  Menu, 
+  X,
+  Send,
+  Zap,
+  Globe,
+  Database,
+  Cpu
 } from "lucide-react";
 import { 
-  BarChart, 
-  Bar, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -36,18 +38,21 @@ import {
 export default function AdminDashboard() {
   const [dark, setDark] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [activeTab, setActiveTab] = useState("Overview");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [list, setList] = useState<any[]>([]);
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [newAlert, setNewAlert] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const ADMIN_EMAIL = "omenaid44420@gmail.com";
   const ADMIN_PASSWORD = "12345";
-
   const orange = "#FF4D00";
   
-  // Theme derived values
   const bg      = dark ? "#000000" : "#ffffff";
   const fg      = dark ? "#ffffff" : "#000000";
   const surface = dark ? "#09090b" : "#f8f9fa";
@@ -66,16 +71,22 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (isLoggedIn) {
-      getWaitingList().then(data => {
-        setList(data);
+      Promise.all([getWaitingList(), getAlerts()]).then(([waitlist, alertsData]) => {
+        setList(waitlist);
+        setAlerts(alertsData);
         setLoading(false);
       });
     }
   }, [isLoggedIn]);
 
+  const filteredList = useMemo(() => {
+    return list.filter(item => 
+      item.email.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [list, searchQuery]);
+
   const analytics = useMemo(() => {
-    if (!list.length) return { daily: [], total: 0, growth: 0 };
-    
+    if (!list.length) return { daily: [], total: 0 };
     const days = [...Array(7)].map((_, i) => {
       const d = new Date();
       d.setDate(d.getDate() - i);
@@ -83,217 +94,263 @@ export default function AdminDashboard() {
       const count = list.filter(item => new Date(item.timestamp).toDateString() === d.toDateString()).length;
       return { name: label, signups: count };
     }).reverse();
-
-    return { daily: days, total: list.length, growth: 14.5 };
+    return { daily: days, total: list.length };
   }, [list]);
+
+  async function handlePushAlert() {
+    if (!newAlert.trim()) return;
+    const res = await pushAlert(newAlert);
+    if (res.success) {
+      setNewAlert("");
+      getAlerts().then(setAlerts);
+    }
+  }
 
   if (!isLoggedIn) {
     return (
-      <div style={{ minHeight: "100vh", background: "#000", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-        <div style={{ width: "100%", maxWidth: 400, background: "#09090b", border: "1px solid #1c1c1f", borderRadius: 16, padding: 40 }}>
-           <div style={{ textAlign: "center", marginBottom: 32 }}>
-              <div style={{ width: 48, height: 48, background: orange, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: "#fff", fontWeight: 900 }}>M</div>
-              <h1 style={{ color: "#fff", fontSize: 24, fontWeight: 700 }}>Admin Login</h1>
-              <p style={{ color: "#a1a1aa", fontSize: 14, marginTop: 8 }}>Access the MycelX Nexus Dashboard</p>
+      <div style={{ minHeight: "100vh", background: "#000", display: "flex", fontFamily: "var(--font-inter)" }}>
+        {/* Left Side: Login Form */}
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 40 }}>
+          <div style={{ width: "100%", maxWidth: 400 }}>
+             <div style={{ marginBottom: 40 }}>
+                <div style={{ width: 48, height: 48, background: orange, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900, marginBottom: 24, boxShadow: `0 0 30px ${orange}33` }}>M</div>
+                <h1 style={{ color: "#fff", fontSize: 32, fontWeight: 800, letterSpacing: "-.04em" }}>Nexus Gateway</h1>
+                <p style={{ color: "#a1a1aa", fontSize: 16, marginTop: 8 }}>Authentication required for protocol administration.</p>
+             </div>
+             <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                <div>
+                   <label style={{ color: "#737373", fontSize: 12, fontWeight: 700, textTransform: "uppercase", marginBottom: 8, display: "block" }}>Security Identity</label>
+                   <input 
+                     type="email" value={email} onChange={e => setEmail(e.target.value)}
+                     placeholder="admin@mycelx.com" required
+                     style={{ width: "100%", background: "#0a0a0a", border: "1px solid #1c1c1f", padding: "16px 20px", borderRadius: 14, color: "#fff", fontSize: 15 }}
+                   />
+                </div>
+                <div>
+                   <label style={{ color: "#737373", fontSize: 12, fontWeight: 700, textTransform: "uppercase", marginBottom: 8, display: "block" }}>Access Key</label>
+                   <input 
+                     type="password" value={password} onChange={e => setPassword(e.target.value)}
+                     placeholder="••••••••" required
+                     style={{ width: "100%", background: "#0a0a0a", border: "1px solid #1c1c1f", padding: "16px 20px", borderRadius: 14, color: "#fff", fontSize: 15 }}
+                   />
+                </div>
+                {error && <p style={{ color: orange, fontSize: 13, background: `${orange}11`, padding: 12, borderRadius: 10, textAlign: "center" }}>{error}</p>}
+                <button style={{ width: "100%", background: "#fff", color: "#000", border: "none", padding: "16px", borderRadius: 14, fontWeight: 800, cursor: "pointer", marginTop: 8, fontSize: 16, transition: "transform 0.2s" }}>Unlock Dashboard</button>
+             </form>
+          </div>
+        </div>
+        
+        {/* Right Side: Visual Design */}
+        <div style={{ flex: 1.2, background: "#050505", borderLeft: "1px solid #1c1c1f", position: "relative", overflow: "hidden", display: window?.innerWidth < 1024 ? "none" : "flex", alignItems: "center", justifyContent: "center" }}>
+           <div style={{ position: "absolute", inset: 0, opacity: 0.1, backgroundImage: `radial-gradient(circle at 2px 2px, ${orange} 1px, transparent 0)`, backgroundSize: "40px 40px" }} />
+           <div style={{ position: "relative", zIndex: 1, textAlign: "center", maxWidth: 400 }}>
+              <div style={{ width: 120, height: 120, borderRadius: 32, background: `${orange}11`, border: `1px solid ${orange}33`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 32px", color: orange }}>
+                 <ShieldCheck size={64} />
+              </div>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: "#fff", marginBottom: 16 }}>Protocol Shield Active</h2>
+              <p style={{ color: "#737373", lineHeight: 1.6 }}>The MycelX administrative layer is secured with dual-factor encryption and real-time node monitoring.</p>
            </div>
-           <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <input 
-                type="email" value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="Email" required
-                style={{ width: "100%", background: "#111", border: "1px solid #222", padding: "12px 16px", borderRadius: 8, color: "#fff" }}
-              />
-              <input 
-                type="password" value={password} onChange={e => setPassword(e.target.value)}
-                placeholder="Password" required
-                style={{ width: "100%", background: "#111", border: "1px solid #222", padding: "12px 16px", borderRadius: 8, color: "#fff" }}
-              />
-              {error && <p style={{ color: orange, fontSize: 12, textAlign: "center" }}>{error}</p>}
-              <button style={{ width: "100%", background: "#fff", color: "#000", border: "none", padding: "14px", borderRadius: 8, fontWeight: 700, cursor: "pointer", marginTop: 8 }}>Sign in</button>
-           </form>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ background: bg, color: fg, minHeight: "100vh", transition: "all 0.3s ease", fontFamily: "var(--font-inter)" }}>
+    <div style={{ background: bg, color: fg, minHeight: "100vh", transition: "all 0.3s ease", fontFamily: "var(--font-inter)", overflow: "hidden" }}>
+      <style jsx global>{`
+        @media (max-width: 1024px) {
+           .sidebar { position: fixed !important; left: -280px; z-index: 1000; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+           .sidebar.open { left: 0 !important; box-shadow: 0 0 100px rgba(0,0,0,0.5); }
+        }
+      `}</style>
+
       <div style={{ display: "flex", minHeight: "100vh" }}>
-        
         {/* Sidebar */}
-        <aside style={{ width: 260, borderRight: `1px solid ${border}`, padding: "24px", display: "flex", flexDirection: "column", gap: 32 }}>
-           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 32, height: 32, background: orange, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900 }}>M</div>
-              <span style={{ fontWeight: 700, fontSize: 18 }}>MycelX Admin</span>
+        <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`} style={{ 
+          width: 280, borderRight: `1px solid ${border}`, padding: "32px 24px", display: "flex", 
+          flexDirection: "column", gap: 40, background: bg, height: "100vh", position: "relative"
+        }}>
+           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                 <div style={{ width: 32, height: 32, background: orange, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900 }}>M</div>
+                 <span style={{ fontWeight: 800, fontSize: 18, letterSpacing: "-.02em" }}>Nexus Core</span>
+              </div>
+              <button onClick={() => setSidebarOpen(false)} style={{ display: window?.innerWidth < 1024 ? 'block' : 'none', background: 'transparent', border: 'none', color: fg }}><X size={20}/></button>
            </div>
 
-           <nav style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+           <nav style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {[
-                { name: "Overview", icon: <LayoutDashboard size={18} />, active: true },
+                { name: "Overview", icon: <LayoutDashboard size={18} /> },
                 { name: "Entities", icon: <Users size={18} /> },
-                { name: "Network", icon: <Activity size={18} /> },
                 { name: "Alerts", icon: <Bell size={18} /> },
-                { name: "System", icon: <Settings size={18} /> }
-              ].map((item, i) => (
-                <div key={i} style={{ 
-                  display: "flex", alignItems: "center", gap: 12, padding: "10px 16px", borderRadius: 10,
-                  background: item.active ? (dark ? "#1c1c1f" : "#f1f5f9") : "transparent",
-                  color: item.active ? fg : muted, cursor: "pointer", fontWeight: 600, fontSize: 14
+                { name: "Settings", icon: <Settings size={18} /> }
+              ].map((item) => (
+                <button key={item.name} onClick={() => setActiveTab(item.name)} style={{ 
+                  display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 12,
+                  background: activeTab === item.name ? (dark ? "#1c1c1f" : "#f1f5f9") : "transparent",
+                  color: activeTab === item.name ? fg : muted, cursor: "pointer", fontWeight: 700, fontSize: 14,
+                  border: "none", width: "100%", textAlign: "left", transition: "all 0.2s"
                 }}>
                   {item.icon} {item.name}
-                </div>
+                </button>
               ))}
            </nav>
 
            <div style={{ marginTop: "auto" }}>
-              <button 
-                onClick={() => setDark(!dark)}
-                style={{ 
-                  width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "10px 16px", borderRadius: 10,
-                  border: `1px solid ${border}`, background: "transparent", color: fg, cursor: "pointer", fontWeight: 600, fontSize: 14, marginBottom: 12
-                }}
-              >
-                {dark ? <Sun size={18} /> : <Moon size={18} />} {dark ? "Light Mode" : "Dark Mode"}
+              <div style={{ padding: 16, background: surface, border: `1px solid ${border}`, borderRadius: 16, marginBottom: 24 }}>
+                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: "50%", background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 900 }}>A</div>
+                    <div style={{ overflow: "hidden" }}>
+                       <p style={{ fontSize: 13, fontWeight: 800, whiteSpace: "nowrap", textOverflow: "ellipsis" }}>{ADMIN_EMAIL}</p>
+                       <p style={{ fontSize: 11, color: "#10b981", fontWeight: 700 }}>Root Admin</p>
+                    </div>
+                 </div>
+              </div>
+              <button onClick={() => setDark(!dark)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 12, border: `1px solid ${border}`, background: "transparent", color: fg, cursor: "pointer", fontWeight: 700, fontSize: 13, marginBottom: 12 }}>
+                {dark ? <Sun size={16} /> : <Moon size={16} />} {dark ? "Light Protocol" : "Deep Protocol"}
               </button>
-              <button 
-                onClick={() => setIsLoggedIn(false)}
-                style={{ 
-                  width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "10px 16px", borderRadius: 10,
-                  border: "none", background: `${orange}11`, color: orange, cursor: "pointer", fontWeight: 700, fontSize: 14
-                }}
-              >
-                <LogOut size={18} /> Sign out
+              <button onClick={() => setIsLoggedIn(false)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 12, border: "none", background: `${orange}11`, color: orange, cursor: "pointer", fontWeight: 800, fontSize: 13 }}>
+                <LogOut size={16} /> Terminate Session
               </button>
            </div>
         </aside>
 
         {/* Main Content */}
-        <main style={{ flex: 1, padding: "40px", overflowY: "auto" }}>
-           
+        <main style={{ flex: 1, padding: "clamp(24px, 5vw, 40px)", overflowY: "auto", height: "100vh" }}>
            {/* Top Bar */}
-           <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 40 }}>
-              <div>
-                 <h2 style={{ fontSize: 32, fontWeight: 700, letterSpacing: "-.02em" }}>Command Center</h2>
-                 <p style={{ color: muted, marginTop: 4 }}>Monitoring global community growth.</p>
+           <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 48, flexWrap: "wrap", gap: 24 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                 <button onClick={() => setSidebarOpen(true)} style={{ display: window?.innerWidth < 1024 ? 'block' : 'none', background: surface, border: `1px solid ${border}`, padding: 10, borderRadius: 10, color: fg }}><Menu size={20}/></button>
+                 <div>
+                    <h2 style={{ fontSize: "clamp(24px, 4vw, 32px)", fontWeight: 800, letterSpacing: "-.03em" }}>{activeTab}</h2>
+                    <p style={{ color: muted, fontSize: 15, fontWeight: 500 }}>System Management Terminal</p>
+                 </div>
               </div>
-              <div style={{ display: "flex", gap: 16 }}>
-                 <div style={{ position: "relative" }}>
-                    <Search size={18} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: muted }} />
+              <div style={{ display: "flex", gap: 16, width: window?.innerWidth < 640 ? "100%" : "auto" }}>
+                 <div style={{ position: "relative", width: "100%" }}>
+                    <Search size={18} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: muted }} />
                     <input 
-                      type="text" placeholder="Search entities..." 
-                      style={{ background: surface, border: `1px solid ${border}`, padding: "10px 16px 10px 40px", borderRadius: 10, width: 280, color: fg, fontSize: 14 }} 
+                      type="text" placeholder="Search entity database..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                      style={{ background: surface, border: `1px solid ${border}`, padding: "12px 16px 12px 44px", borderRadius: 12, width: 320, color: fg, fontSize: 14, fontWeight: 500 }} 
                     />
                  </div>
               </div>
            </header>
 
-           {/* Dashboard Grid */}
-           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24, marginBottom: 32 }}>
-              {[
-                { label: "Total Signups", value: analytics.total, icon: <Users size={20} />, up: true },
-                { label: "Conversion Rate", value: "24.2%", icon: <TrendingUp size={20} />, up: true },
-                { label: "Active Nodes", value: "1,204", icon: <Activity size={20} />, up: true },
-                { label: "System Uptime", value: "99.9%", icon: <ShieldCheck size={20} />, up: true }
-              ].map((stat, i) => (
-                <div key={i} style={{ background: surface, border: `1px solid ${border}`, borderRadius: 16, padding: 24 }}>
-                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                      <span style={{ color: muted, fontSize: 13, fontWeight: 600 }}>{stat.label}</span>
-                      <div style={{ color: muted }}>{stat.icon}</div>
+           {activeTab === "Overview" && (
+             <div className="reveal active">
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 24, marginBottom: 40 }}>
+                   {[
+                     { label: "Network Entities", value: analytics.total, icon: <Users size={20} /> },
+                     { label: "Growth Rate", value: "+14.5%", icon: <TrendingUp size={20} /> },
+                     { label: "Uptime", value: "99.99%", icon: <Activity size={20} /> },
+                     { label: "Encrypted", value: "AES-256", icon: <ShieldCheck size={20} /> }
+                   ].map((stat, i) => (
+                     <div key={i} style={{ background: surface, border: `1px solid ${border}`, borderRadius: 20, padding: 28, boxShadow: "0 4px 20px rgba(0,0,0,0.02)" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                           <span style={{ color: muted, fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em" }}>{stat.label}</span>
+                           <div style={{ color: orange, background: `${orange}11`, padding: 8, borderRadius: 10 }}>{stat.icon}</div>
+                        </div>
+                        <h3 style={{ fontSize: 32, fontWeight: 900 }}>{stat.value}</h3>
+                     </div>
+                   ))}
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: window?.innerWidth < 1200 ? "1fr" : "2fr 1fr", gap: 24 }}>
+                   <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 24, padding: 32 }}>
+                      <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 32 }}>Signup Velocity</h3>
+                      <div style={{ height: 350, width: "100%" }}>
+                         <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={analytics.daily}>
+                               <defs>
+                                  <linearGradient id="colorSignups" x1="0" y1="0" x2="0" y2="1">
+                                     <stop offset="5%" stopColor={orange} stopOpacity={0.3}/>
+                                     <stop offset="95%" stopColor={orange} stopOpacity={0}/>
+                                  </linearGradient>
+                               </defs>
+                               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={dark ? "#1c1c1f" : "#e2e8f0"} />
+                               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: muted, fontSize: 12}} dy={10} />
+                               <YAxis axisLine={false} tickLine={false} tick={{fill: muted, fontSize: 12}} />
+                               <Tooltip contentStyle={{ background: dark ? "#000" : "#fff", border: `1px solid ${border}`, borderRadius: 12 }} />
+                               <Area type="monotone" dataKey="signups" stroke={orange} strokeWidth={3} fill="url(#colorSignups)" />
+                            </AreaChart>
+                         </ResponsiveContainer>
+                      </div>
                    </div>
-                   <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                      <span style={{ fontSize: 24, fontWeight: 800 }}>{stat.value}</span>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: "#10b981", display: "flex", alignItems: "center" }}>
-                        <ArrowUpRight size={14} /> +12%
-                      </span>
+
+                   <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 24, padding: 32 }}>
+                      <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 24 }}>System Health</h3>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                         {[
+                           { name: "Protocol Core", status: "Operational", color: "#10b981" },
+                           { name: "Substrate Node", status: "Operational", color: "#10b981" },
+                           { name: "Oracle Sync", status: "Operational", color: "#10b981" },
+                           { name: "Identity Layer", status: "Under Load", color: "#f59e0b" }
+                         ].map(sys => (
+                           <div key={sys.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <span style={{ fontWeight: 600, fontSize: 14 }}>{sys.name}</span>
+                              <span style={{ fontSize: 12, fontWeight: 800, color: sys.color, background: `${sys.color}11`, padding: "4px 12px", borderRadius: 100 }}>{sys.status}</span>
+                           </div>
+                         ))}
+                      </div>
                    </div>
                 </div>
-              ))}
-           </div>
+             </div>
+           )}
 
-           {/* Visual Analysis */}
-           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24, marginBottom: 32 }}>
-              
-              {/* Main Chart */}
-              <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 16, padding: 32 }}>
-                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
-                    <h3 style={{ fontSize: 18, fontWeight: 700 }}>Signup Velocity</h3>
-                    <div style={{ display: "flex", gap: 8 }}>
-                       {['Day', 'Week', 'Month'].map(t => (
-                         <span key={t} style={{ fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 6, background: t === 'Week' ? (dark ? "#fff" : "#000") : "transparent", color: t === 'Week' ? (dark ? "#000" : "#fff") : muted, cursor: "pointer" }}>{t}</span>
-                       ))}
-                    </div>
-                 </div>
-                 <div style={{ height: 350, width: "100%" }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                       <AreaChart data={analytics.daily}>
-                          <defs>
-                             <linearGradient id="colorSignups" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor={orange} stopOpacity={0.3}/>
-                                <stop offset="95%" stopColor={orange} stopOpacity={0}/>
-                             </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={dark ? "#1c1c1f" : "#e2e8f0"} />
-                          <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: muted, fontSize: 12}} dy={10} />
-                          <YAxis axisLine={false} tickLine={false} tick={{fill: muted, fontSize: 12}} />
-                          <Tooltip 
-                             contentStyle={{ background: dark ? "#000" : "#fff", border: `1px solid ${border}`, borderRadius: 8 }}
-                             itemStyle={{ color: orange, fontWeight: 700 }}
-                          />
-                          <Area type="monotone" dataKey="signups" stroke={orange} strokeWidth={3} fillOpacity={1} fill="url(#colorSignups)" />
-                       </AreaChart>
-                    </ResponsiveContainer>
-                 </div>
-              </div>
+           {activeTab === "Entities" && (
+             <div className="reveal active">
+                <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 24, overflowX: "auto" }}>
+                   <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", minWidth: 600 }}>
+                      <thead>
+                         <tr style={{ borderBottom: `1px solid ${border}`, background: dark ? "#0c0c0e" : "#f1f5f9" }}>
+                            <th style={{ padding: "20px 32px", fontSize: 12, fontWeight: 800, color: muted, textTransform: "uppercase" }}>Entity Identity</th>
+                            <th style={{ padding: "20px 32px", fontSize: 12, fontWeight: 800, color: muted, textTransform: "uppercase" }}>Registry Date</th>
+                            <th style={{ padding: "20px 32px", fontSize: 12, fontWeight: 800, color: muted, textTransform: "uppercase" }}>Auth Status</th>
+                         </tr>
+                      </thead>
+                      <tbody>
+                         {filteredList.map((item, i) => (
+                           <tr key={i} style={{ borderBottom: `1px solid ${border}` }}>
+                              <td style={{ padding: "20px 32px", fontSize: 15, fontWeight: 700 }}>{item.email}</td>
+                              <td style={{ padding: "20px 32px", fontSize: 14, color: muted }}>{new Date(item.timestamp).toLocaleString()}</td>
+                              <td style={{ padding: "20px 32px" }}>
+                                 <span style={{ padding: "6px 14px", borderRadius: 100, background: "#10b98111", color: "#10b981", fontSize: 11, fontWeight: 900, textTransform: "uppercase" }}>Registered</span>
+                              </td>
+                           </tr>
+                         ))}
+                      </tbody>
+                   </table>
+                </div>
+             </div>
+           )}
 
-              {/* Live Activity Feed */}
-              <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 16, padding: 32, display: "flex", flexDirection: "column" }}>
-                 <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 24 }}>Recent Activity</h3>
-                 <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 20 }}>
-                    {list.slice(-5).reverse().map((item, i) => (
-                      <div key={i} style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                         <div style={{ width: 40, height: 40, background: dark ? "#1c1c1f" : "#fff", border: `1px solid ${border}`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <Mail size={16} color={orange} />
-                         </div>
-                         <div style={{ flex: 1 }}>
-                            <p style={{ fontSize: 14, fontWeight: 700 }}>{item.email.split('@')[0]}*** joined</p>
-                            <p style={{ fontSize: 12, color: muted }}>{new Date(item.timestamp).toLocaleTimeString()}</p>
-                         </div>
-                         <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981" }} />
-                      </div>
-                    ))}
-                 </div>
-                 <button style={{ width: "100%", padding: "12px", borderRadius: 8, border: `1px solid ${border}`, background: "transparent", color: fg, fontSize: 13, fontWeight: 700, marginTop: "auto", cursor: "pointer" }}>
-                    View All Logs
-                 </button>
-              </div>
-           </div>
+           {activeTab === "Alerts" && (
+             <div className="reveal active" style={{ maxWidth: 700 }}>
+                <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 24, padding: 40, marginBottom: 32 }}>
+                   <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 8 }}>Push Protocol Update</h3>
+                   <p style={{ color: muted, marginBottom: 32 }}>Updates reflect instantly on the MycelX home network.</p>
+                   <textarea 
+                     value={newAlert} onChange={e => setNewAlert(e.target.value)}
+                     placeholder="State the update content..." 
+                     style={{ width: "100%", height: 120, background: "#0a0a0a", border: `1px solid ${border}`, borderRadius: 16, padding: 20, color: "#fff", fontSize: 15, marginBottom: 20, resize: "none" }}
+                   />
+                   <button onClick={handlePushAlert} style={{ display: "flex", alignItems: "center", gap: 10, background: orange, color: "#fff", border: "none", padding: "14px 28px", borderRadius: 14, fontWeight: 800, cursor: "pointer", fontSize: 15 }}>
+                      Broadcast Update <Send size={18} />
+                   </button>
+                </div>
 
-           {/* Data Table */}
-           <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 16, overflow: "hidden" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
-                 <thead>
-                    <tr style={{ borderBottom: `1px solid ${border}`, background: dark ? "#0c0c0e" : "#f1f5f9" }}>
-                       <th style={{ padding: "16px 24px", fontSize: 13, fontWeight: 700, color: muted }}>Entity Address</th>
-                       <th style={{ padding: "16px 24px", fontSize: 13, fontWeight: 700, color: muted }}>Protocol Entry</th>
-                       <th style={{ padding: "16px 24px", fontSize: 13, fontWeight: 700, color: muted }}>Network Status</th>
-                       <th style={{ padding: "16px 24px" }}></th>
-                    </tr>
-                 </thead>
-                 <tbody>
-                    {list.map((item, i) => (
-                      <tr key={i} style={{ borderBottom: `1px solid ${border}` }}>
-                         <td style={{ padding: "16px 24px", fontSize: 14, fontWeight: 600 }}>{item.email}</td>
-                         <td style={{ padding: "16px 24px", fontSize: 14, color: muted }}>{new Date(item.timestamp).toLocaleString()}</td>
-                         <td style={{ padding: "16px 24px" }}>
-                            <span style={{ padding: "4px 10px", borderRadius: 100, background: "#10b98111", color: "#10b981", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>Verified</span>
-                         </td>
-                         <td style={{ padding: "16px 24px", textAlign: "right" }}>
-                            <MoreHorizontal size={18} color={muted} style={{ cursor: "pointer" }} />
-                         </td>
-                      </tr>
-                    ))}
-                 </tbody>
-              </table>
-           </div>
+                <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 24 }}>History Ledger</h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                   {alerts.map((alert) => (
+                     <div key={alert.id} style={{ background: surface, border: `1px solid ${border}`, borderRadius: 20, padding: 24 }}>
+                        <p style={{ fontSize: 15, lineHeight: 1.6, marginBottom: 12, fontWeight: 500 }}>{alert.content}</p>
+                        <p style={{ fontSize: 11, color: muted, fontWeight: 800 }}>{new Date(alert.timestamp).toLocaleString()}</p>
+                     </div>
+                   ))}
+                </div>
+             </div>
+           )}
 
         </main>
       </div>
