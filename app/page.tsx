@@ -27,10 +27,12 @@ import {
   Database,
   Search,
   Code,
-  Globe
+  Globe,
+  Activity,
+  MousePointer2
 } from "lucide-react";
 
-// Custom SVG Icons to avoid naming issues and build errors
+// Custom SVG Icons to avoid naming issues
 const GithubIcon = (props: any) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
 );
@@ -58,10 +60,10 @@ const FEATURES = [
 ];
 
 const TECH_STACK = [
-  { name: "Rust", icon: <Code size={20} />, desc: "Primary logic for safety and speed." },
-  { name: "Substrate", icon: <Database size={20} />, desc: "Modular blockchain framework." },
-  { name: "Polkadot", icon: <Globe size={20} />, desc: "Cross-chain interoperability layer." },
-  { name: "Wasm", icon: <Cpu size={20} />, desc: "High-performance smart execution." }
+  { name: "Rust", icon: <Code size={24} />, desc: "Primary logic for safety and speed. Memory-safe protocol core.", accent: "#DEA584" },
+  { name: "Substrate", icon: <Database size={24} />, desc: "Modular blockchain framework. Custom-tailored for community sovereignty.", accent: "#FF4D00" },
+  { name: "Wasm", icon: <Cpu size={24} />, desc: "High-performance smart execution. Platform-agnostic compute layer.", accent: "#624DE8" },
+  { name: "libp2p", icon: <Globe size={24} />, desc: "Global peer-to-peer networking. Decentralized discovery and routing.", accent: "#10b981" }
 ];
 
 const ROADMAP = [
@@ -96,9 +98,17 @@ const TEAM = [
 ];
 
 const TASKS = [
-  { id: 1, title: "Protocol Contribution", reward: "250 $MYC", icon: <Code size={20} />, desc: "Submit a pull request to our core Substrate repository." },
-  { id: 2, title: "Security Audit", reward: "500 $MYC", icon: <Shield size={20} />, desc: "Identify and document potential identity layer vulnerabilities." },
-  { id: 3, title: "Market Growth", reward: "150 $MYC", icon: <TrendingUpIcon size={20} />, desc: "Onboard 5 verified developers to the waitlist." }
+  { id: 1, title: "Substrate Runtime Dev", reward: "2500 $MYC", icon: <Code size={20} />, desc: "Build custom pallets for the Mycel identity layer." },
+  { id: 2, title: "Protocol Pentest", reward: "5000 $MYC", icon: <Shield size={20} />, desc: "Conduct stress tests on our p2p message routing nodes." },
+  { id: 3, title: "Governance Design", reward: "1500 $MYC", icon: <Users size={20} />, desc: "Architect decentralized voting systems for $MYC holders." }
+];
+
+const WORLD_REGIONS = [
+  { name: "North America", x: 25, y: 35, traction: "892 Nodes", traffic: "High" },
+  { name: "Europe", x: 52, y: 30, traction: "1,204 Nodes", traffic: "Critical" },
+  { name: "Asia Pacific", x: 75, y: 45, traction: "567 Nodes", traffic: "Growing" },
+  { name: "South America", x: 35, y: 70, traction: "214 Nodes", traffic: "Emerging" },
+  { name: "Africa", x: 52, y: 60, traction: "148 Nodes", traffic: "Active" }
 ];
 
 const VerifiedBadge = () => (
@@ -118,6 +128,7 @@ export default function MycelXWaitlist() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [alerts, setAlerts] = useState<any[]>([]);
+  const [selectedRegion, setSelectedRegion] = useState<any>(null);
 
   useEffect(() => {
     getWaitingList().then(list => setCount(847 + (list?.length || 0)));
@@ -131,8 +142,8 @@ export default function MycelXWaitlist() {
 
     const handleMouseMove = (e: MouseEvent) => {
       setMousePos({
-        x: (e.clientX / window.innerWidth - 0.5) * 40,
-        y: (e.clientY / window.innerHeight - 0.5) * 40
+        x: (e.clientX / window.innerWidth - 0.5) * 30,
+        y: (e.clientY / window.innerHeight - 0.5) * 30
       });
     };
 
@@ -141,9 +152,7 @@ export default function MycelXWaitlist() {
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('active');
-        }
+        if (entry.isIntersecting) entry.target.classList.add('active');
       });
     }, { threshold: 0.1 });
 
@@ -177,189 +186,77 @@ export default function MycelXWaitlist() {
   return (
     <div style={{ background: bg, color: fg, minHeight: "100vh", transition: "background 0.5s cubic-bezier(0.16, 1, 0.3, 1), color 0.5s" }} className="font-inter">
       
-      {/* Scroll Progress Bar */}
-      <div style={{ 
-        position: "fixed", top: 0, left: 0, height: "2px", 
-        width: `${scrollProgress}%`, background: orange, 
-        zIndex: 1100, transition: "width 0.1s linear" 
-      }} />
+      <div style={{ position: "fixed", top: 0, left: 0, height: "2px", width: `${scrollProgress}%`, background: orange, zIndex: 1100, transition: "width 0.1s linear" }} />
 
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
-        
-        :root {
-          --font-display: 'Space Grotesk', sans-serif;
-          --font-inter: 'Inter', sans-serif;
-        }
-
+        :root { --font-display: 'Space Grotesk', sans-serif; --font-inter: 'Inter', sans-serif; }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
-        
         html { scroll-behavior: smooth; }
         .dsp { font-family: var(--font-display); }
         .font-inter { font-family: var(--font-inter); }
-
-        /* Orb Animations */
-        @keyframes orbPulse {
-          0%, 100% { transform: scale(1); opacity: 0.3; }
-          50% { transform: scale(1.1); opacity: 0.6; }
-        }
-
-        @keyframes orbRotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-
-        @keyframes resonance {
-          0% { stroke-dashoffset: 0; stroke-width: 1px; opacity: 0.5; }
-          50% { stroke-dashoffset: 100; stroke-width: 3px; opacity: 1; }
-          100% { stroke-dashoffset: 200; stroke-width: 1px; opacity: 0.5; }
-        }
-
-        .reveal {
-          opacity: 0;
-          transform: translateY(40px);
-          filter: blur(10px);
-          transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .reveal.active {
-          opacity: 1;
-          transform: translateY(0);
-          filter: blur(0);
-        }
-
+        @keyframes orbPulse { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.1); opacity: 0.6; } }
+        @keyframes orbRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes resonance { 0% { stroke-dashoffset: 0; stroke-width: 1px; opacity: 0.5; } 50% { stroke-dashoffset: 100; stroke-width: 3px; opacity: 1; } 100% { stroke-dashoffset: 200; stroke-width: 1px; opacity: 0.5; } }
+        .reveal { opacity: 0; transform: translateY(40px); filter: blur(10px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); filter: blur(0); }
         .stagger-container.active > * { opacity: 1; transform: translateY(0); }
-        .stagger-container > * {
-          opacity: 0;
-          transform: translateY(20px);
-          transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
+        .stagger-container > * { opacity: 0; transform: translateY(20px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
         .stagger-container > *:nth-child(1) { transition-delay: 0.1s; }
         .stagger-container > *:nth-child(2) { transition-delay: 0.2s; }
         .stagger-container > *:nth-child(3) { transition-delay: 0.3s; }
-
-        .btn-premium {
-          background: ${orange};
-          color: white;
-          border: none;
-          padding: 12px 24px;
-          border-radius: 100px;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.3s;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          box-shadow: 0 8px 20px ${orange}33;
-          white-space: nowrap;
-        }
-
+        .btn-premium { background: ${orange}; color: white; border: none; padding: 12px 24px; border-radius: 100px; font-weight: 700; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 20px ${orange}33; white-space: nowrap; }
         .btn-premium:hover { transform: translateY(-2px); box-shadow: 0 12px 30px ${orange}55; }
         .btn-premium:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-        .card-feature {
-          transition: all 0.4s;
-          cursor: default;
-          background: ${surface};
-          border: 1px solid ${border};
-        }
-        
-        .card-feature:hover {
-          border-color: ${orange}66 !important;
-          transform: translateY(-8px);
-          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-
-        .faq-stack {
-          position: relative;
-          min-height: 400px;
-          max-width: 800px;
-          margin: 0 auto;
-        }
-
-        .faq-item {
-          position: absolute;
-          width: 100%;
-          transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-          cursor: pointer;
-        }
-
+        .card-feature { transition: all 0.4s; cursor: default; background: ${surface}; border: 1px solid ${border}; }
+        .card-feature:hover { border-color: ${orange}66 !important; transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .faq-stack { position: relative; min-height: 400px; max-width: 800px; margin: 0 auto; }
+        .faq-item { position: absolute; width: 100%; transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; }
         .faq-item:nth-child(1) { top: 0; z-index: 3; }
         .faq-item:nth-child(2) { top: 60px; z-index: 2; transform: scale(0.98); opacity: 0.9; }
         .faq-item:nth-child(3) { top: 120px; z-index: 1; transform: scale(0.96); opacity: 0.8; }
-
         .faq-stack:hover .faq-item:nth-child(1) { transform: translateY(-40px); }
         .faq-stack:hover .faq-item:nth-child(2) { transform: translateY(140px) scale(1); opacity: 1; }
         .faq-stack:hover .faq-item:nth-child(3) { transform: translateY(320px) scale(1); opacity: 1; }
-
-        @keyframes successPop {
-          0% { transform: scale(0.8); opacity: 0; }
-          50% { transform: scale(1.1); opacity: 1; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-
+        @keyframes successPop { 0% { transform: scale(0.8); opacity: 0; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
         .success-anim { animation: successPop 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
-
+        @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+        .ping { animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
         @media (max-width: 768px) {
-          .hhl { font-size: 40px !important; }
-          .sp { padding: 80px 20px !important; }
-          .hide-mobile { display: none !important; }
-          .reveal-mobile { display: block !important; }
+          .hhl { font-size: 40px !important; } .sp { padding: 80px 20px !important; }
+          .hide-mobile { display: none !important; } .reveal-mobile { display: block !important; }
           .grid-stack { flex-direction: column !important; gap: 16px !important; }
           .faq-stack { height: auto; min-height: 0; display: flex; flex-direction: column; gap: 20px; }
           .faq-item { position: relative; top: 0 !important; transform: none !important; opacity: 1 !important; }
+          .tech-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
 
       {/* ─── NAVIGATION ─── */}
-      <nav style={{ 
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, 
-        transition: "all 0.4s",
-        padding: scrolled ? "12px 0" : "24px 0",
-        background: scrolled ? (dark ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.8)") : "transparent",
-        backdropFilter: scrolled ? "blur(20px)" : "none",
-        borderBottom: scrolled ? `1px solid ${border}` : "1px solid transparent"
-      }}>
+      <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, transition: "all 0.4s", padding: scrolled ? "12px 0" : "24px 0", background: scrolled ? (dark ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.8)") : "transparent", backdropFilter: scrolled ? "blur(20px)" : "none", borderBottom: scrolled ? `1px solid ${border}` : "1px solid transparent" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div className="dsp" style={{ fontWeight: 800, fontSize: 22, letterSpacing: "-.04em", display: "flex", alignItems: "center", gap: 12 }}>
-            <img src="/assets/IMG-20260610-WA0065.jpg" style={{ width: 36, height: 36, borderRadius: 10, objectFit: "cover" }} />
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 900 }}>M</div>
             <span style={{ color: fg }}>MycelX</span>
           </div>
-          
           <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
             <div className="hide-mobile" style={{ display: "flex", alignItems: "center", gap: 32 }}>
                <a href="#features" style={{ fontSize: 13, fontWeight: 700, color: muted, textDecoration: "none", textTransform: "uppercase", letterSpacing: "0.1em" }}>Features</a>
                <a href="#tasks" style={{ fontSize: 13, fontWeight: 700, color: muted, textDecoration: "none", textTransform: "uppercase", letterSpacing: "0.1em" }}>Earn</a>
-               <a href="#roadmap" style={{ fontSize: 13, fontWeight: 700, color: muted, textDecoration: "none", textTransform: "uppercase", letterSpacing: "0.1em" }}>Roadmap</a>
+               <a href="#global" style={{ fontSize: 13, fontWeight: 700, color: muted, textDecoration: "none", textTransform: "uppercase", letterSpacing: "0.1em" }}>Global</a>
             </div>
-            
-            <button onClick={() => setDark(!dark)} style={{ 
-              background: dark ? "#111" : "#f5f5f5", 
-              border: `1px solid ${border}`,
-              padding: "8px 12px", borderRadius: 100, 
-              display: "flex", alignItems: "center", gap: 8,
-              cursor: "pointer", color: fg, fontSize: 11, fontWeight: 800
-            }}>
+            <button onClick={() => setDark(!dark)} style={{ background: dark ? "#111" : "#f5f5f5", border: `1px solid ${border}`, padding: "8px 12px", borderRadius: 100, display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: fg, fontSize: 11, fontWeight: 800 }}>
               {dark ? <Sun size={14} /> : <Moon size={14} />}
             </button>
-
-            <button className="btn-premium hide-mobile" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              Join Access
-            </button>
-
-            <button className="reveal-mobile" onClick={() => setMobileMenu(!mobileMenu)} style={{ display: "none", background: "transparent", border: "none", color: fg, cursor: "pointer" }}>
-               {mobileMenu ? <X /> : <Menu />}
-            </button>
+            <button className="btn-premium hide-mobile" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Join Access</button>
+            <button className="reveal-mobile" onClick={() => setMobileMenu(!mobileMenu)} style={{ display: "none", background: "transparent", border: "none", color: fg, cursor: "pointer" }}>{mobileMenu ? <X /> : <Menu />}</button>
           </div>
         </div>
-
-        {/* Mobile Menu */}
         {mobileMenu && (
           <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: bg, borderBottom: `1px solid ${border}`, padding: "24px", display: "flex", flexDirection: "column", gap: 20, zIndex: 1000 }}>
              <a href="#features" onClick={() => setMobileMenu(false)} style={{ fontSize: 14, fontWeight: 700, color: fg, textDecoration: "none" }}>Features</a>
              <a href="#tasks" onClick={() => setMobileMenu(false)} style={{ fontSize: 14, fontWeight: 700, color: fg, textDecoration: "none" }}>Earn $MYC</a>
-             <a href="#roadmap" onClick={() => setMobileMenu(false)} style={{ fontSize: 14, fontWeight: 700, color: fg, textDecoration: "none" }}>Roadmap</a>
+             <a href="#global" onClick={() => setMobileMenu(false)} style={{ fontSize: 14, fontWeight: 700, color: fg, textDecoration: "none" }}>Connectivity</a>
              <button className="btn-premium" style={{ width: "100%", justifyContent: "center" }} onClick={() => { setMobileMenu(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Join Waitlist</button>
           </div>
         )}
@@ -378,171 +275,108 @@ export default function MycelXWaitlist() {
 
       {/* ─── HERO SECTION ─── */}
       <section style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", paddingTop: 100 }}>
-        
-        {/* Resonating Orb Background */}
-        <div style={{ 
-          position: "absolute", inset: 0, pointerEvents: "none", 
-          display: "flex", alignItems: "center", justifyContent: "center",
-          transform: `translate(${mousePos.x}px, ${mousePos.y}px)`,
-          transition: "transform 0.2s ease-out"
-        }}>
+        <div style={{ position: "absolute", inset: 0, pointerEvents: "none", display: "flex", alignItems: "center", justifyContent: "center", transform: `translate(${mousePos.x}px, ${mousePos.y}px)`, transition: "transform 0.2s ease-out" }}>
           <div style={{ position: "relative", width: "800px", height: "800px" }}>
-            <div style={{
-              position: "absolute", inset: "25%",
-              background: `radial-gradient(circle, ${orange} 0%, transparent 70%)`,
-              filter: "blur(60px)",
-              opacity: dark ? 0.3 : 0.2,
-              animation: "orbPulse 8s infinite ease-in-out"
-            }} />
-            
+            <div style={{ position: "absolute", inset: "25%", background: `radial-gradient(circle, ${orange} 0%, transparent 70%)`, filter: "blur(60px)", opacity: dark ? 0.3 : 0.2, animation: "orbPulse 8s infinite ease-in-out" }} />
             <svg width="100%" height="100%" viewBox="0 0 1000 1000" style={{ animation: "orbRotate 60s infinite linear" }}>
-              <defs>
-                <linearGradient id="orbGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor={orange} />
-                  <stop offset="50%" stopColor="#FFCC00" />
-                  <stop offset="100%" stopColor="#9333EA" />
-                </linearGradient>
-              </defs>
-              
+              <defs><linearGradient id="orbGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor={orange} /><stop offset="50%" stopColor="#FFCC00" /><stop offset="100%" stopColor="#9333EA" /></linearGradient></defs>
               {[...Array(6)].map((_, i) => (
-                <circle
-                  key={i}
-                  cx="500" cy="500"
-                  r={120 + i * 70}
-                  fill="none"
-                  stroke="url(#orbGrad)"
-                  strokeWidth="1"
-                  strokeDasharray={i % 2 === 0 ? "1, 20" : "10, 30"}
-                  opacity={0.4 - i * 0.05}
-                  style={{
-                    animation: `resonance ${6 + i * 4}s infinite linear`,
-                    transformOrigin: "center"
-                  } as any}
-                />
+                <circle key={i} cx="500" cy="500" r={120 + i * 70} fill="none" stroke="url(#orbGrad)" strokeWidth="1" strokeDasharray={i % 2 === 0 ? "1, 20" : "10, 30"} opacity={0.4 - i * 0.05} style={{ animation: `resonance ${6 + i * 4}s infinite linear`, transformOrigin: "center" } as any} />
               ))}
             </svg>
           </div>
         </div>
-
         <div style={{ position: "absolute", inset: 0, opacity: dark ? 0.03 : 0.05, backgroundImage: `linear-gradient(${fg} 1px,transparent 1px),linear-gradient(90deg,${fg} 1px,transparent 1px)`, backgroundSize: "60px 60px" }} />
-
         <div style={{ position: "relative", zIndex: 10, textAlign: "center", maxWidth: 900, padding: "0 24px" }}>
-          <h1 className="hhl dsp reveal active" style={{ fontSize: "clamp(48px, 10vw, 108px)", fontWeight: 800, lineHeight: 0.9, letterSpacing: "-.06em", marginBottom: 32 }}>
-            Sovereign Thought.<br />
-            <span style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", backgroundImage: `linear-gradient(135deg, ${fg} 0%, ${orange} 100%)` }}>
-              Decentralized.
-            </span>
-          </h1>
-
-          <p className="reveal active" style={{ fontSize: "clamp(17px, 2vw, 20px)", color: muted, maxWidth: 660, margin: "0 auto 48px", lineHeight: 1.6, fontWeight: 500 }}>
-            MycelX is a reputation-driven communication protocol. Built on Substrate to eliminate visual noise and empower pure, anonymous intelligence.
-          </p>
-
+          <h1 className="hhl dsp reveal active" style={{ fontSize: "clamp(48px, 10vw, 108px)", fontWeight: 800, lineHeight: 0.9, letterSpacing: "-.06em", marginBottom: 32 }}>Sovereign Thought.<br /><span style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", backgroundImage: `linear-gradient(135deg, ${fg} 0%, ${orange} 100%)` }}>Decentralized.</span></h1>
+          <p className="reveal active" style={{ fontSize: "clamp(17px, 2vw, 20px)", color: muted, maxWidth: 660, margin: "0 auto 48px", lineHeight: 1.6, fontWeight: 500 }}>MycelX is a reputation-driven communication protocol. Built on Substrate to eliminate visual noise and empower pure, anonymous intelligence.</p>
           <div className="reveal active" style={{ maxWidth: 500, margin: "0 auto" }}>
             {!submitted ? (
               <div style={{ position: "relative" }}>
                  <div className="grid-stack" style={{ display: "flex", background: dark ? "#0a0a0a" : "#fff", border: `1px solid ${border}`, borderRadius: 24, padding: "8px", boxShadow: dark ? "0 20px 60px rgba(0,0,0,0.5)" : "0 20px 60px rgba(0,0,0,0.05)" }}>
-                    <input 
-                      type="email" placeholder="Connect email..." value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      onKeyDown={e => e.key === "Enter" && handleJoin()}
-                      disabled={loading}
-                      style={{ flex: 1, background: "transparent", border: "none", color: fg, fontSize: 16, padding: "12px 24px", fontWeight: 500 }}
-                    />
-                    <button className="btn-premium" onClick={handleJoin} disabled={loading || !email} style={{ height: 50, justifyContent: "center" }}>
-                      {loading ? "Joining..." : "Get Access"} <ArrowRight size={18} />
-                    </button>
+                    <input type="email" placeholder="Connect email..." value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === "Enter" && handleJoin()} disabled={loading} style={{ flex: 1, background: "transparent", border: "none", color: fg, fontSize: 16, padding: "12px 24px", fontWeight: 500 }} />
+                    <button className="btn-premium" onClick={handleJoin} disabled={loading || !email} style={{ height: 50, justifyContent: "center" }}>{loading ? "Joining..." : "Get Access"} <ArrowRight size={18} /></button>
                  </div>
-                 <p style={{ fontSize: 13, color: muted, marginTop: 16, fontWeight: 600 }}>
-                    <Users size={14} style={{ verticalAlign: "middle", marginRight: 6 }} /> <span style={{ color: fg }}>{count.toLocaleString()}</span> thinkers currently waitlisted.
-                 </p>
+                 <p style={{ fontSize: 13, color: muted, marginTop: 16, fontWeight: 600 }}><Users size={14} style={{ verticalAlign: "middle", marginRight: 6 }} /> <span style={{ color: fg }}>{count.toLocaleString()}</span> thinkers currently waitlisted.</p>
               </div>
             ) : (
               <div className="success-anim" style={{ display: "flex", alignItems: "center", gap: 20, padding: "28px", border: `1px solid ${orange}33`, borderRadius: 28, background: `${orange}08`, textAlign: "left" }}>
-                <div style={{ width: 56, height: 56, borderRadius: "50%", background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, flexShrink: 0, boxShadow: `0 10px 20px ${orange}44` }}>
-                   <CheckCircle2 size={32} />
-                </div>
-                <div>
-                  <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4, color: fg }}>Access Logged.</h3>
-                  <p style={{ color: muted, fontSize: 15, fontWeight: 500 }}>The network will notify you upon activation.</p>
-                </div>
+                <div style={{ width: 56, height: 56, borderRadius: "50%", background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, flexShrink: 0, boxShadow: `0 10px 20px ${orange}44` }}><CheckCircle2 size={32} /></div>
+                <div><h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4, color: fg }}>Access Logged.</h3><p style={{ color: muted, fontSize: 15, fontWeight: 500 }}>The network will notify you upon activation.</p></div>
               </div>
             )}
           </div>
         </div>
-
-        <div style={{ position: "absolute", bottom: 40, left: "50%", transform: "translateX(-50%)", color: muted }}>
-           <ChevronDown size={20} className="animate-bounce" />
-        </div>
+        <div style={{ position: "absolute", bottom: 40, left: "50%", transform: "translateX(-50%)", color: muted }}><ChevronDown size={20} className="animate-bounce" /></div>
       </section>
 
-      {/* ─── TECH STACK SECTION ─── */}
+      {/* ─── TECH STACK SECTION (REDESIGNED) ─── */}
       <section className="sp reveal" style={{ padding: "120px 40px", borderTop: `1px solid ${border}` }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
            <div style={{ textAlign: "center", marginBottom: 80 }}>
               <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 20 }}>Architecture</p>
-              <h2 className="dsp" style={{ fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 800, color: fg }}>Core Protocol Stack</h2>
+              <h2 className="dsp" style={{ fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 800, color: fg }}>Protocol Foundation</h2>
            </div>
-           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 24 }}>
+           <div className="tech-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24 }}>
               {TECH_STACK.map((tech) => (
-                <div key={tech.name} className="card-feature" style={{ padding: "32px", borderRadius: 24, textAlign: "center" }}>
-                   <div style={{ color: orange, marginBottom: 16, display: "flex", justifyContent: "center" }}>{tech.icon}</div>
-                   <h4 className="dsp" style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{tech.name}</h4>
-                   <p style={{ color: muted, fontSize: 14, fontWeight: 500 }}>{tech.desc}</p>
+                <div key={tech.name} className="card-feature" style={{ padding: "40px", borderRadius: 32, textAlign: "center", position: "relative", overflow: "hidden" }}>
+                   <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "4px", background: tech.accent }} />
+                   <div style={{ color: tech.accent, marginBottom: 20, display: "flex", justifyContent: "center" }}>{tech.icon}</div>
+                   <h4 className="dsp" style={{ fontSize: 22, fontWeight: 800, marginBottom: 12 }}>{tech.name}</h4>
+                   <p style={{ color: muted, fontSize: 15, lineHeight: 1.6, fontWeight: 500 }}>{tech.desc}</p>
+                   <div style={{ marginTop: 24, display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 800, color: tech.accent, textTransform: "uppercase", letterSpacing: "0.05em" }}>Verified Layer <CheckCircle2 size={14} /></div>
                 </div>
               ))}
            </div>
         </div>
       </section>
 
-      {/* ─── FEATURES SECTION ─── */}
-      <section id="features" className="sp" style={{ padding: "160px 40px", position: "relative" }}>
+      {/* ─── GLOBAL CONNECTIVITY SECTION (GLOBE) ─── */}
+      <section id="global" className="sp reveal" style={{ padding: "160px 40px", background: dark ? "#050505" : "#fafafa", borderTop: `1px solid ${border}` }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <div className="reveal" style={{ textAlign: "center", marginBottom: 120 }}>
-            <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 24 }}>Capabilities</p>
-            <h2 className="dsp" style={{ fontSize: "clamp(32px, 6vw, 56px)", fontWeight: 800, lineHeight: 1.1, color: fg }}>Living Infrastructure.</h2>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 32 }} className="stagger-container reveal">
-            {FEATURES.map((f, i) => (
-              <div key={i} className="card-feature" style={{ padding: 60, borderRadius: 56, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", gap: 32 }}>
-                <div style={{ height: 140, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                   <svg width="100%" height="100%" viewBox="0 0 200 200">
-                      {i === 0 && (
-                        <g>
-                          <circle cx="100" cy="100" r="10" fill={orange} />
-                          {[...Array(8)].map((_, j) => (
-                            <path key={j} d="M100,60 L100,90" stroke={orange} strokeWidth="1" strokeDasharray="5,5" transform={`rotate(${j * 45} 100 100)`} />
-                          ))}
-                        </g>
-                      )}
-                      {i === 1 && (
-                        <g transform="rotate(45 100 100)">
-                          <rect x="75" y="75" width="50" height="50" stroke={orange} strokeWidth="1" fill="none" />
-                          <circle cx="75" cy="75" r="5" fill={orange} />
-                          <circle cx="125" cy="125" r="5" fill={orange} />
-                        </g>
-                      )}
-                      {i === 2 && (
-                        <circle cx="100" cy="100" r="40" stroke={orange} strokeWidth="1" fill="none" strokeDasharray="10,10" style={{ animation: "orbRotate 10s infinite linear", transformOrigin: "center" }} />
-                      )}
-                   </svg>
-                </div>
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 900, color: muted, background: dark ? "#111" : "#eee", padding: "6px 16px", borderRadius: 100, letterSpacing: "0.05em", width: "fit-content", marginBottom: 16 }}>{f.tag}</div>
-                  <h3 className="dsp" style={{ fontSize: 24, fontWeight: 800, marginBottom: 16, color: fg }}>{f.title}</h3>
-                  <p style={{ color: muted, fontSize: 16, lineHeight: 1.7, fontWeight: 500 }}>{f.body}</p>
-                </div>
+           <div style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: 80, alignItems: "center" }} className="grid-stack">
+              <div>
+                 <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 20 }}>Network Coverage</p>
+                 <h2 className="dsp" style={{ fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 800, lineHeight: 1.1, marginBottom: 32, color: fg }}>Global Nexus.</h2>
+                 <p style={{ color: muted, fontSize: 18, lineHeight: 1.7, fontWeight: 500, marginBottom: 40 }}>MycelX nodes are proliferating across all continents. Our decentralized mesh ensures that intelligence has no borders.</p>
+                 
+                 {selectedRegion ? (
+                   <div className="success-anim" style={{ background: surface, border: `1px solid ${orange}33`, padding: 32, borderRadius: 28 }}>
+                      <h4 className="dsp" style={{ fontSize: 24, fontWeight: 800, color: orange, marginBottom: 8 }}>{selectedRegion.name}</h4>
+                      <div style={{ display: "flex", gap: 24 }}>
+                         <div><p style={{ fontSize: 11, fontWeight: 800, color: muted }}>TRACTION</p><p style={{ fontSize: 18, fontWeight: 900 }}>{selectedRegion.traction}</p></div>
+                         <div><p style={{ fontSize: 11, fontWeight: 800, color: muted }}>TRAFFIC</p><p style={{ fontSize: 18, fontWeight: 900, color: "#10b981" }}>{selectedRegion.traffic}</p></div>
+                      </div>
+                   </div>
+                 ) : (
+                   <div style={{ display: "flex", alignItems: "center", gap: 12, color: muted, fontWeight: 600 }}>
+                      <MousePointer2 size={20} /> Select a region on the nexus map to view metrics.
+                   </div>
+                 )}
               </div>
-            ))}
-          </div>
+
+              <div style={{ position: "relative", aspectRatio: "16/9", background: dark ? "#0a0a0a" : "#eee", borderRadius: 40, border: `1px solid ${border}`, overflow: "hidden" }}>
+                 <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M10,20 Q30,10 50,20 T90,20 M10,40 Q30,30 50,40 T90,40 M10,60 Q30,50 50,60 T90,60 M10,80 Q30,70 50,80 T90,80" stroke={muted} strokeWidth="0.1" opacity="0.2" fill="none" />
+                    {WORLD_REGIONS.map((region) => (
+                      <g key={region.name} onClick={() => setSelectedRegion(region)} style={{ cursor: "pointer" }}>
+                         <circle cx={region.x} cy={region.y} r="2" fill={orange} className="node">
+                            <title>{region.name}</title>
+                         </circle>
+                         <circle cx={region.x} cy={region.y} r="6" stroke={orange} strokeWidth="0.5" fill="none" className="ping" />
+                      </g>
+                    ))}
+                 </svg>
+                 <div style={{ position: "absolute", bottom: 20, right: 24, fontSize: 10, fontWeight: 800, color: muted, textTransform: "uppercase" }}>Real-time Node Distribution</div>
+              </div>
+           </div>
         </div>
       </section>
 
       {/* ─── EARN SECTION (TASKS) ─── */}
-      <section id="tasks" className="sp reveal" style={{ padding: "140px 40px", background: dark ? "#050505" : "#fafafa", borderTop: `1px solid ${border}` }}>
+      <section id="tasks" className="sp reveal" style={{ padding: "140px 40px", borderTop: `1px solid ${border}` }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: 64, alignItems: "center" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: 64, alignItems: "center" }} className="grid-stack">
              <div>
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "8px 16px", background: `${orange}11`, border: `1px solid ${orange}33`, borderRadius: 100, marginBottom: 24 }}>
                    <Trophy size={16} color={orange} />
@@ -550,17 +384,12 @@ export default function MycelXWaitlist() {
                 </div>
                 <h2 className="dsp" style={{ fontSize: "clamp(32px, 5vw, 48px)", fontWeight: 800, lineHeight: 1.1, marginBottom: 24, color: fg }}>Build MycelX.<br />Earn Tokens.</h2>
                 <p style={{ color: muted, fontSize: 18, lineHeight: 1.7, fontWeight: 500, marginBottom: 32 }}>We're looking for high-IQ builders to scale the protocol. Complete technical tasks and receive direct token allocations.</p>
-                <button className="btn-premium" style={{ padding: "16px 32px" }}>
-                   Quest Terminal <Terminal size={18} />
-                </button>
+                <button className="btn-premium" style={{ padding: "16px 32px" }}>Quest Terminal <Terminal size={18} /></button>
              </div>
-
              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {TASKS.map((task) => (
                   <div key={task.id} className="card-feature" style={{ padding: "24px 32px", borderRadius: 24, display: "flex", alignItems: "center", gap: 24 }}>
-                     <div style={{ width: 48, height: 48, borderRadius: 12, background: `${orange}11`, color: orange, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        {task.icon}
-                     </div>
+                     <div style={{ width: 48, height: 48, borderRadius: 12, background: `${orange}11`, color: orange, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{task.icon}</div>
                      <div style={{ flex: 1 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
                            <h4 style={{ fontWeight: 800, fontSize: 16 }}>{task.title}</h4>
@@ -582,7 +411,6 @@ export default function MycelXWaitlist() {
               <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 20 }}>System Lifecycle</p>
               <h2 className="dsp" style={{ fontSize: "clamp(32px, 5vw, 56px)", fontWeight: 800, color: fg }}>Operational Roadmap</h2>
            </div>
-           
            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 60 }} className="stagger-container reveal">
               {ROADMAP.map((item, i) => (
                 <div key={i} style={{ position: "relative" }}>
@@ -607,7 +435,6 @@ export default function MycelXWaitlist() {
             <p style={{ fontSize: 14, fontWeight: 800, color: orange, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 24 }}>Founders</p>
             <h2 className="dsp" style={{ fontWeight: 800, fontSize: "clamp(32px, 6vw, 56px)", letterSpacing: "-.04em", lineHeight: 1.1, color: fg }}>The Architects.</h2>
           </div>
-
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: 32 }} className="stagger-container reveal">
             {TEAM.map((dev, i) => (
               <div key={i} className="card-feature" style={{ padding: "32px", borderRadius: 28, display: "block", color: fg, position: "relative" }}>
@@ -621,9 +448,7 @@ export default function MycelXWaitlist() {
                       <VerifiedBadge />
                       <span style={{ color: muted, fontSize: 15 }}>@{dev.handle} · 2h</span>
                     </div>
-                    <p style={{ fontSize: 15, lineHeight: 1.5, marginBottom: 16, fontWeight: 500 }}>
-                      Scaling the community layer with {dev.skills.join(", ")}. MycelX is the future of text-first sovereignty.
-                    </p>
+                    <p style={{ fontSize: 15, lineHeight: 1.5, marginBottom: 16, fontWeight: 500 }}>Scaling the community layer with {dev.skills.join(", ")}. MycelX is the future of text-first sovereignty.</p>
                     <div style={{ background: dark ? "#0a0a0a" : "#fafafa", border: `1px solid ${border}`, borderRadius: 16, padding: 16, marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                           {dev.skills.slice(0, 3).map(skill => (
@@ -653,7 +478,6 @@ export default function MycelXWaitlist() {
       <section className="reveal" style={{ padding: "120px 40px", background: dark ? "#050505" : "#fafafa" }}>
         <div style={{ maxWidth: 850, margin: "0 auto" }}>
            <h2 className="dsp" style={{ fontSize: 36, fontWeight: 800, marginBottom: 80, textAlign: "center", color: fg }}>Deep Logic</h2>
-           
            <div className="faq-stack stagger-container reveal">
               {[
                 { q: "Is MycelX a social network?", a: "No. MycelX is a reputation protocol for text-first communication. It can power social networks, but its primary function is identity and value exchange." },
@@ -676,7 +500,7 @@ export default function MycelXWaitlist() {
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 64 }}>
            <div>
               <div className="dsp" style={{ fontWeight: 800, fontSize: 28, letterSpacing: "-.04em", display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
-                <img src="/assets/IMG-20260610-WA0065.jpg" style={{ width: 44, height: 44, borderRadius: 12, objectFit: "cover" }} />
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: orange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 900 }}>M</div>
                 <span style={{ color: fg }}>MycelX</span>
               </div>
               <p style={{ color: muted, fontSize: 16, lineHeight: 1.7, maxWidth: 320, fontWeight: 500 }}>The next generation of decentralized community architecture. Built on Substrate.</p>

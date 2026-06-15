@@ -23,8 +23,7 @@ import {
   Zap,
   Globe,
   Database,
-  Cpu,
-  ArrowRight
+  Cpu
 } from "lucide-react";
 import { 
   XAxis, 
@@ -55,6 +54,7 @@ export default function AdminDashboard() {
   const [error, setError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [isClient, setIsClient] = useState(false);
 
   const ADMIN_EMAIL = "omenaid44420@gmail.com";
   const ADMIN_PASSWORD = "12345";
@@ -77,6 +77,7 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
+    setIsClient(true);
     if (isLoggedIn) {
       Promise.all([getWaitingList(), getAlerts()]).then(([waitlist, alertsData]) => {
         setList(waitlist);
@@ -171,7 +172,7 @@ export default function AdminDashboard() {
            <div style={{ position: "absolute", inset: 0, opacity: 0.05, backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`, backgroundSize: "40px 40px" }} />
            
            <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 440 }}>
-              <div style={{ transition: "all 0.5s ease", transform: "translateY(0)" }}>
+              <div>
                  <div style={{ background: "#0a0a0a", border: "1px solid #1c1c1f", borderRadius: 32, padding: 48, boxShadow: "0 40px 100px rgba(0,0,0,0.5)" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 32 }}>
                        <img 
@@ -312,21 +313,23 @@ export default function AdminDashboard() {
                    <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 24, padding: "clamp(20px, 4vw, 32px)" }}>
                       <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 32 }}>Signup Velocity</h3>
                       <div style={{ height: 350, width: "100%" }}>
-                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={analytics.daily}>
-                               <defs>
-                                  <linearGradient id="colorSignups" x1="0" y1="0" x2="0" y2="1">
-                                     <stop offset="5%" stopColor={orange} stopOpacity={0.3}/>
-                                     <stop offset="95%" stopColor={orange} stopOpacity={0}/>
-                                  </linearGradient>
-                               </defs>
-                               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={dark ? "#1c1c1f" : "#e2e8f0"} />
-                               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: muted, fontSize: 12}} dy={10} />
-                               <YAxis axisLine={false} tickLine={false} tick={{fill: muted, fontSize: 12}} />
-                               <Tooltip contentStyle={{ background: dark ? "#000" : "#fff", border: `1px solid ${border}`, borderRadius: 12 }} />
-                               <Area type="monotone" dataKey="signups" stroke={orange} strokeWidth={3} fill="url(#colorSignups)" />
-                            </AreaChart>
-                         </ResponsiveContainer>
+                         {isClient && (
+                           <ResponsiveContainer width="100%" height="100%">
+                              <AreaChart data={analytics.daily}>
+                                 <defs>
+                                    <linearGradient id="colorSignups" x1="0" y1="0" x2="0" y2="1">
+                                       <stop offset="5%" stopColor={orange} stopOpacity={0.3}/>
+                                       <stop offset="95%" stopColor={orange} stopOpacity={0}/>
+                                    </linearGradient>
+                                 </defs>
+                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={dark ? "#1c1c1f" : "#e2e8f0"} />
+                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: muted, fontSize: 12}} dy={10} />
+                                 <YAxis axisLine={false} tickLine={false} tick={{fill: muted, fontSize: 12}} />
+                                 <Tooltip contentStyle={{ background: dark ? "#000" : "#fff", border: `1px solid ${border}`, borderRadius: 12 }} />
+                                 <Area type="monotone" dataKey="signups" stroke={orange} strokeWidth={3} fill="url(#colorSignups)" />
+                              </AreaChart>
+                           </ResponsiveContainer>
+                         )}
                       </div>
                    </div>
 
